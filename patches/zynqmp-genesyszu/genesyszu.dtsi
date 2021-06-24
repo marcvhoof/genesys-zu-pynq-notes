@@ -1,0 +1,374 @@
+#include "include/dt-bindings/interrupt-controller/irq.h"
+#include "include/dt-bindings/gpio/gpio.h"
+#include "include/dt-bindings/media/xilinx-vip.h"
+#include "include/dt-bindings/net/ti-dp83867.h"
+#include "include/dt-bindings/phy/phy.h"
+
+/ {
+	model = "ZynqMP Genesys ZU";
+	compatible = "xlnx,zynqmp-genesyszu", "xlnx,zynqmp";
+};
+
+&sdhci1 {
+        /delete-property/ no-1-8-v;
+	disable-wp;
+	xlnx,itap-delay-sd-hsd = <0x29>;
+	xlnx,itap-delay-sd-ddr50 = <0x32>;
+	xlnx,itap-delay-sdr25 = <0x2A>;
+	xlnx,itap-delay-sdr50 = <0x1E>;
+	xlnx,itap-delay-sdr104 = <0x0B>; //although auto-tuned, tuning fails on some cards if not set
+};
+
+&gem0 {
+	status = "okay";
+	phy-handle = <&phy0>;
+	phy-mode = "rgmii-id";
+	phy0: phy@15 {
+		reg = <0x0F>;
+		reset-gpios = <&gpio 44 GPIO_ACTIVE_LOW>;
+		reset-assert-us = <1>;
+		reset_deassert-us = <200>;
+		interrupt-parent = <&gpio>;
+		interrupts = <38 IRQ_TYPE_LEVEL_LOW>;
+		ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>; //overwrites strap config
+		ti,tx-internal-delay = <DP83867_RGMIIDCTL_1_50_NS>; //overwrites strap config
+		ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
+		ti,clk-output-sel = <DP83867_CLK_O_SEL_REF_CLK>;
+	};
+};
+
+
+/*
+Adding support for the mux and expose all 8 segments.
+RESET# pin of TCA9548 is inverted on-board. Mapped to
+EMIO[0] which is line 78.
+*/
+&i2c0 {
+	i2c-mux@70 {
+		compatible = "nxp,pca9548";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg = <0x70>;
+		reset-gpios = <&gpio 78 GPIO_ACTIVE_HIGH>;
+		i2c@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0>;
+		};
+		i2c@1 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <1>;
+		};
+		i2c@2 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <2>;
+		};
+		i2c@3 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <3>;
+			pmu@43 { /* IRPS5401 - IC81 */
+				#clock-cells = <0>;
+				compatible = "infineon,irps5401";
+				reg = <0x43>; /*PMBUS address*/
+			};
+			pmu@44 { /* IRPS5401 - IC83 */
+				#clock-cells = <0>;
+				compatible = "infineon,irps5401";
+				reg = <0x44>; /*PMBUS address*/
+			};
+			pmu@45 { /* IRPS5401 - IC84 */
+				#clock-cells = <0>;
+				compatible = "infineon,irps5401";
+				reg = <0x45>; /*PMBUS address*/
+			};
+		};
+		i2c@4 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <4>;
+			eeprom@51 { /*FMC VITA 57.1 FRU*/
+				compatible = "atmel,24c02";
+				reg = <0x51>;
+				pagesize = <1>; /* varies between models, so use a safe value */
+			};
+		};
+		i2c@5 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <5>;
+			/* not sure if we should bind the eeprom driver to the SYZYGY DNA */
+			eeprom@30 { /* SYZYGY DNA */
+				compatible = "atmel,24c02";
+				reg = <0x30>;
+				read-only;
+				address-width = <16>;
+				size = <65536>; /*the whole 16-bit address range*/
+			};
+		};
+		i2c@6 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <6>;
+		};
+		i2c@7 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <7>;
+		};
+	};
+};
+
+&spi0 {
+	gpioexp: gpio@1 {
+		compatible = "microchip,mcp23s08";
+		gpio-controller;
+		#reset-cells = <1>;
+		#gpio-cells = <2>;
+		interrupt-parent = <&gpio>;
+		interrupts = <25 IRQ_TYPE_LEVEL_LOW>;
+		microchip,spi-present-mask = <0x01>;
+		interrupt-controller;
+		#interrupt-cells = <0x2>;
+		reg = <1>; /*SS[1]*/
+		spi-max-frequency = <10000000>;
+	};
+	wilc_spi@0 {
+		compatible = "microchip,wilc1000", "microchip,wilc3000";
+		spi-max-frequency = <48000000>;
+		reg = <0>;
+		irq-gpios = <&gpioexp 1 0>;
+		reset-gpios = <&gpioexp 2 0>;
+		chip_en-gpios = <&gpioexp 0 0>;
+		status = "okay";
+	};
+};
+
+/*&usb0 {
+	status = "disabled";
+};*/
+
+&qspi {
+	u-boot,dm-pre-reloc;
+};
+
+&dwc3_0 {
+	dr_mode = "host";
+	snps,usb3_lpm_capable;
+	phy-names = "usb3-phy";
+	//phys = <PHANDLE CONTROLLER_TYPE CONTROLLER_INSTANCE LANE_NUM LANE_FREQ>;
+	phys = <&lane1 PHY_TYPE_USB3 0 0 100000000>;
+	snps,dis_u2_susphy_quirk ;
+	snps,dis_u3_susphy_quirk ;
+	maximum-speed = "super-speed";
+};
+
+&dwc3_1 {
+	snps,dis_u2_susphy_quirk;
+	snps,dis_u3_susphy_quirk;
+	//resets = <&gpiom1 5>;
+	dr_mode = "host";
+};
+
+&ams_pl {
+	xlnx,ext-channels {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		channel@0 {
+			reg = <0>;
+		};
+		channel@5 {
+			reg = <5>;
+		};
+		channel@6 {
+			reg = <6>;
+		};
+		channel@7 {
+			reg = <7>;
+		};
+		channel@8 {
+			reg = <8>;
+		};
+	};
+};
+
+&gpio {
+	gpio-line-names =
+	"gpio0",
+	"gpio1",
+	"gpio2",
+	"gpio3",
+	"gpio4",
+	"gpio5",
+	"gpio6",
+	"gpio7",
+	"gpio8",
+	"gpio9",
+	"btn1",
+	"btn0",
+	"gpio12",
+	"gpio13",
+	"gpio14",
+	"gpio15",
+	"gpio16",
+	"gpio17",
+	"gpio18",
+	"gpio19",
+	"gpio20",
+	"led0",
+	"gpio22",
+	"gpio23",
+	"gpio24",
+	"gpio25",
+	"gpio26",
+	"gpio27",
+	"gpio28",
+	"gpio29",
+	"gpio30",
+	"gpio31",
+	"gpio32",
+	"gpio33",
+	"gpio34",
+	"gpio35",
+	"gpio36",
+	"gpio37",
+	"gpio38",
+	"gpio39",
+	"gpio40",
+	"gpio41",
+	"gpio42",
+	"gpio43",
+	"gpio44",
+	"gpio45",
+	"gpio46",
+	"gpio47",
+	"gpio48",
+	"gpio49",
+	"gpio50",
+	"gpio51",
+	"gpio52",
+	"gpio53",
+	"gpio54",
+	"gpio55",
+	"gpio56",
+	"gpio57",
+	"gpio58",
+	"gpio59",
+	"gpio60",
+	"gpio61",
+	"gpio62",
+	"gpio63",
+	"gpio64",
+	"gpio65",
+	"gpio66",
+	"gpio67",
+	"gpio68",
+	"gpio69",
+	"gpio70",
+	"gpio71",
+	"gpio72",
+	"gpio73",
+	"gpio74",
+	"gpio75",
+	"gpio76",
+	"gpio77",
+	"iic_mux_reset",
+	"mipiA_pwup",
+	"mipiB_pwup",
+	"gpio81",
+	"gpio82",
+	"gpio83",
+	"gpio84",
+	"gpio85",
+	"gpio86",
+	"gpio87",
+	"gpio88",
+	"gpio89",
+	"gpio90",
+	"gpio91",
+	"gpio92",
+	"gpio93",
+	"gpio94",
+	"gpio95",
+	"gpio96",
+	"gpio97",
+	"gpio98",
+	"gpio99",
+	"gpio100",
+	"gpio101",
+	"gpio102",
+	"gpio103",
+	"gpio104",
+	"gpio105",
+	"gpio106",
+	"gpio107",
+	"gpio108",
+	"gpio109",
+	"gpio110",
+	"gpio111",
+	"gpio112",
+	"gpio113",
+	"gpio114",
+	"gpio115",
+	"gpio116",
+	"gpio117",
+	"gpio118",
+	"gpio119",
+	"gpio120",
+	"gpio121",
+	"gpio122",
+	"gpio123",
+	"gpio124",
+	"gpio125",
+	"gpio126",
+	"gpio127",
+	"gpio128",
+	"gpio129",
+	"gpio130",
+	"gpio131",
+	"gpio132",
+	"gpio133",
+	"gpio134",
+	"gpio135",
+	"gpio136",
+	"gpio137",
+	"gpio138",
+	"gpio139",
+	"gpio140",
+	"gpio141",
+	"gpio142",
+	"gpio143",
+	"gpio144",
+	"gpio145",
+	"gpio146",
+	"gpio147",
+	"gpio148",
+	"gpio149",
+	"gpio150",
+	"gpio151",
+	"gpio152",
+	"gpio153",
+	"gpio154",
+	"gpio155",
+	"gpio156",
+	"gpio157",
+	"gpio158",
+	"gpio159",
+	"gpio160",
+	"gpio161",
+	"gpio162",
+	"gpio163",
+	"gpio164",
+	"gpio165",
+	"gpio166",
+	"gpio167",
+	"gpio168",
+	"gpio169",
+	"gpio170",
+	"gpio171",
+	"gpio172",
+	"gpio173";
+
+};

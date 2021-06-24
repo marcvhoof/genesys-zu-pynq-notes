@@ -1,0 +1,15 @@
+kernel_image=Image
+
+devicetree_image=devicetree.dtb
+
+ramdisk_image=uInitrd
+
+kernel_load_address=0x80000
+
+devicetree_load_address=0x4000000
+
+ramdisk_load_address=0x02100000
+
+bootcmd=fatload mmc 0 ${kernel_load_address} ${kernel_image} && fatload mmc 0 ${devicetree_load_address} ${devicetree_image} && load mmc 0 ${ramdisk_load_address} ${ramdisk_image} && bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}
+
+bootargs=earlycon console=ttyPS0,115200 clk_ignore_unused modloop=modloop cma=36M

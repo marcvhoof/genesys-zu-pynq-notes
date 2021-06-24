@@ -25,21 +25,12 @@ void detach(char *path)
 int main()
 {
   FILE *fp;
-  int fd, id, i, j, top;
+  int i, j;
   struct stat sb;
   size_t size;
   char buffer[256];
-  char path[291];
+  char path[284];
   volatile int *slcr;
-
-  if((fd = open("/dev/mem", O_RDWR)) < 0)
-  {
-    fwrite(forbidden, 24, 1, stdout);
-    return 1;
-  }
-
-  slcr = mmap(NULL, sysconf(_SC_PAGESIZE), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0xF8000000);
-  id = (slcr[332] >> 12) & 0x1f;
 
   if(fgets(buffer, 256, stdin) == NULL)
   {
@@ -59,7 +50,6 @@ int main()
     return 1;
   }
 
-  top = 1;
   for(i = 5; i < 255; ++i)
   {
     if(buffer[i] == ' ')
@@ -67,7 +57,6 @@ int main()
       buffer[i] = 0;
       break;
     }
-    if(buffer[i] != '/') top = 0;
   }
 
   for(j = 5; j < i - 1; ++j)
@@ -92,14 +81,7 @@ int main()
   {
     memcpy(path + 21 + i - 4, "/start.sh", 10);
     detach(path);
-    if(top && id == 7)
-    {
-      memcpy(path + 21 + i - 4, "/index_122_88.html", 19);
-    }
-    else
-    {
-      memcpy(path + 21 + i - 4, "/index.html", 12);
-    }
+    memcpy(path + 21 + i - 4, "/index.html", 12);
   }
 
   fp = fopen(path, "r");

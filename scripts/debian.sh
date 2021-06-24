@@ -1,16 +1,17 @@
+LINUX_TAG=xlnx_rebase_v5.4_ubuntu_20.04_p1
 device=$1
 
 boot_dir=`mktemp -d /tmp/BOOT.XXXXXXXXXX`
 root_dir=`mktemp -d /tmp/ROOT.XXXXXXXXXX`
 
-linux_dir=tmp/linux-5.4
-linux_ver=5.4.126-xilinx
+linux_dir=tmp/linux-$LINUX_TAG
+linux_ver=5.4.0
 
 # Choose mirror automatically, depending the geographic and network location
 mirror=http://deb.debian.org/debian
 
 distro=stretch
-arch=armhf
+arch=arm64
 
 passwd=changeme
 timezone=Europe/Brussels
@@ -18,8 +19,8 @@ timezone=Europe/Brussels
 # Create partitions
 
 parted -s $device mklabel msdos
-parted -s $device mkpart primary fat16 4MiB 16MiB
-parted -s $device mkpart primary ext4 16MiB 100%
+parted -s $device mkpart primary fat16 4MiB 32MiB
+parted -s $device mkpart primary ext4 32MiB 100%
 
 boot_dev=/dev/`lsblk -ln -o NAME -x NAME $device | sed '2!d'`
 root_dev=/dev/`lsblk -ln -o NAME -x NAME $device | sed '3!d'`
@@ -36,8 +37,8 @@ mount $root_dev $root_dir
 
 # Copy files to the boot file system
 
-cp boot.bin devicetree.dtb uImage $boot_dir
-cp uEnv-ext4.txt $boot_dir/uEnv.txt
+cp boot.bin devicetree.dtb Image $boot_dir
+cp cfg/uEnv-ext4.txt $boot_dir/uEnv.txt
 
 # Install Debian base system to the root file system
 
@@ -89,7 +90,7 @@ cat <<- EOF_CAT > etc/fstab
 /dev/mmcblk0p1  /boot           vfat    defaults            0       2
 EOF_CAT
 
-echo red-pitaya > etc/hostname
+echo genesys-zu > etc/hostname
 
 apt-get update
 apt-get -y upgrade
@@ -112,7 +113,7 @@ sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' etc/ssh/sshd_config
 
 cat <<- EOF_CAT >> etc/securetty
 
-# Serial Console for Xilinx Zynq-7000
+# Serial Console for Xilinx Zynq-MPSOC
 ttyPS0
 EOF_CAT
 
@@ -152,7 +153,7 @@ macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
 wpa=2
-wpa_passphrase=RedPitaya
+wpa_passphrase=GenesysZU
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=CCMP
 rsn_pairwise=CCMP

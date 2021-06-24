@@ -1,4 +1,5 @@
-source projects/base_system/block_design.tcl
+# Create processing_system8 (MPSOC) and Genesys ZU board specifics
+source cfg/essentials.tcl
 
 # Create xlconstant
 cell xilinx.com:ip:xlconstant const_0
@@ -6,50 +7,34 @@ cell xilinx.com:ip:xlconstant const_0
 # Create proc_sys_reset
 cell xilinx.com:ip:proc_sys_reset rst_0 {} {
   ext_reset_in const_0/dout
+  aux_reset_in ps_0/pl_resetn0
+  slowest_sync_clk ps_0/pl_clk0
 }
 
-# LED
+# Create button
+# Create axis_gpio_reader
+#cell pavel-demin:user:axis_gpio_reader gpio_0 {
+#  AXIS_TDATA_WIDTH 5
+#} {
+#  gpio_data pl_buttons
+#  aclk ps_0/pl_clk0
+#}
 
+# LED
 # Create c_counter_binary
 cell xilinx.com:ip:c_counter_binary cntr_0 {
   Output_Width 32
 } {
-  CLK pll_0/clk_out1
+  CLK ps_0/pl_clk0
 }
 
-# Create port_slicer
-cell pavel-demin:user:port_slicer slice_0 {
-  DIN_WIDTH 32 DIN_FROM 26 DIN_TO 26
+# Create xlslice
+cell xilinx.com:ip:xlslice slice_0 {
+  DIN_WIDTH 32 DIN_FROM 26 DIN_TO 26 DOUT_WIDTH 1
 } {
-  din cntr_0/Q
-  dout led_o
+  Din cntr_0/Q
+  Dout led_o
 }
 
-# STS
-
-# Create dna_reader
-cell pavel-demin:user:dna_reader dna_0 {} {
-  aclk pll_0/clk_out1
-  aresetn rst_0/peripheral_aresetn
-}
-
-# Create xlconcat
-cell xilinx.com:ip:xlconcat concat_0 {
-  NUM_PORTS 2
-  IN0_WIDTH 32
-  IN1_WIDTH 64
-} {
-  In0 const_0/dout
-  In1 dna_0/dna_data
-}
-
-# Create axi_sts_register
-cell pavel-demin:user:axi_sts_register sts_0 {
-  STS_DATA_WIDTH 96
-  AXI_ADDR_WIDTH 32
-  AXI_DATA_WIDTH 32
-} {
-  sts_data concat_0/dout
-}
-
-addr 0x40000000 4K sts_0/S_AXI /ps_0/M_AXI_GP0
+#The DNA reader has not been ported yet to DNA_PORTE2 (https://www.xilinx.com/support/documentation/user_guides/ug570-ultrascale-configuration.pdf).
+#

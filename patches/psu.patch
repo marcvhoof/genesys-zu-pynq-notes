@@ -1,0 +1,853 @@
+--- psu_init.c
++++ psu_init.c
+@@ -5855,12 +5855,12 @@
+     * Register : GPR1 @ 0XFD0800C4
+ 
+     * General Purpose Register 1
+-    *  PSU_DDR_PHY_GPR1_GPR1                                       0xe3
++    *  PSU_DDR_PHY_GPR1_GPR1                                       0xde
+ 
+     * General Purpose Register 1
+-    * (OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000E3U)
++    * (OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000DEU)
+     */
+-	PSU_Mask_Write(DDR_PHY_GPR1_OFFSET, 0xFFFFFFFFU, 0x000000E3U);
++	PSU_Mask_Write(DDR_PHY_GPR1_OFFSET, 0xFFFFFFFFU, 0x000000DEU);
+ /*##################################################################### */
+ 
+     /*
+@@ -8289,15 +8289,15 @@
+     *  PSU_DDR_PHY_DX2GCR4_RESERVED_7_6                            0x0
+ 
+     * VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-    *  PSU_DDR_PHY_DX2GCR4_DXREFIEN                                0x1
++    *  PSU_DDR_PHY_DX2GCR4_DXREFIEN                                0xf
+ 
+     * VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+     *  PSU_DDR_PHY_DX2GCR4_DXREFIMON                               0x0
+ 
+     * DATX8 n General Configuration Register 4
+-    * (OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B004U)
++    * (OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B03CU)
+     */
+-	PSU_Mask_Write(DDR_PHY_DX2GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B004U);
++	PSU_Mask_Write(DDR_PHY_DX2GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B03CU);
+ /*##################################################################### */
+ 
+     /*
+@@ -8566,15 +8566,15 @@
+     *  PSU_DDR_PHY_DX3GCR4_RESERVED_7_6                            0x0
+ 
+     * VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-    *  PSU_DDR_PHY_DX3GCR4_DXREFIEN                                0x1
++    *  PSU_DDR_PHY_DX3GCR4_DXREFIEN                                0xf
+ 
+     * VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+     *  PSU_DDR_PHY_DX3GCR4_DXREFIMON                               0x0
+ 
+     * DATX8 n General Configuration Register 4
+-    * (OFFSET, MASK, VALUE)      (0XFD080A10, 0xFFFFFFFFU ,0x0E00B004U)
++    * (OFFSET, MASK, VALUE)      (0XFD080A10, 0xFFFFFFFFU ,0x0E00B03CU)
+     */
+-	PSU_Mask_Write(DDR_PHY_DX3GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B004U);
++	PSU_Mask_Write(DDR_PHY_DX3GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B03CU);
+ /*##################################################################### */
+ 
+     /*
+
+@@ -15233,10 +15233,10 @@
+ 
+     * When set, this enables mio_bank1_pullupdown to selects pull up or pull d
+     * own for MIO Bank 1 - control MIO[51:26]
+-    * (OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x03F03FBEU)
++    * (OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x02FC0FEFU)
+     */
+ 	PSU_Mask_Write(IOU_SLCR_BANK1_CTRL5_OFFSET,
+-		0x03FFFFFFU, 0x03F03FBEU);
++		0x03FFFFFFU, 0x02FC0FEFU);
+ /*##################################################################### */
+ 
+     /*
+
+--- psu_init.h
++++ psu_init.h
+@@ -2910,6 +2910,8 @@
+ #define DDR_PHY_DX8SL4DXCTL2_OFFSET                                                0XFD08152C
+ #undef DDR_PHY_DX8SL4IOCR_OFFSET 
+ #define DDR_PHY_DX8SL4IOCR_OFFSET                                                  0XFD081530
++#undef DDR_PHY_DX8SLBPLLCR0_OFFSET 
++#define DDR_PHY_DX8SLBPLLCR0_OFFSET                                                0XFD0817C4
+ #undef DDR_PHY_DX8SLBDQSCTL_OFFSET 
+ #define DDR_PHY_DX8SLBDQSCTL_OFFSET                                                0XFD0817DC
+ 
+@@ -30787,8 +30921,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT           14
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK            0x00004000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT           12
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK            0x00001000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30797,8 +30931,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT           15
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK            0x00008000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT           13
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK            0x00002000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30807,8 +30941,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT           16
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK            0x00010000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT           14
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK            0x00004000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30817,8 +30951,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT           17
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK            0x00020000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT           15
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK            0x00008000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30827,8 +30961,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT           18
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK            0x00040000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT           16
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK            0x00010000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30837,8 +30971,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT           19
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK            0x00080000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT           17
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK            0x00020000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30847,8 +30981,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT           20
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK            0x00100000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT           18
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK            0x00040000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30857,8 +30991,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT           21
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK            0x00200000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT           19
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK            0x00080000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30867,8 +31001,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT           22
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK            0x00400000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT           20
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK            0x00100000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30877,8 +31011,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT           23
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK            0x00800000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT           21
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK            0x00200000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30887,8 +31021,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT          24
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK           0x01000000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT          22
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK           0x00400000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30897,8 +31031,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT          25
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK           0x02000000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT          23
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK           0x00800000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30907,8 +31041,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT          0
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK           0x00000001U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT          24
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK           0x01000000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30917,8 +31051,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT          1
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK           0x00000002U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT          25
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK           0x02000000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30927,8 +31061,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT          2
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK           0x00000004U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT          0
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK           0x00000001U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30937,8 +31071,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT          3
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK           0x00000008U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT          1
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK           0x00000002U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30947,8 +31081,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT          4
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK           0x00000010U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT          2
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK           0x00000004U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30957,8 +31091,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT          5
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK           0x00000020U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT          3
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK           0x00000008U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30967,8 +31101,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT          6
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK           0x00000040U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT          4
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK           0x00000010U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30977,8 +31111,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT          7
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK           0x00000080U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT          5
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK           0x00000020U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30987,8 +31121,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT          8
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK           0x00000100U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT          6
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK           0x00000040U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30997,8 +31131,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT          9
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK           0x00000200U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT          7
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK           0x00000080U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31007,8 +31141,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT          10
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK           0x00000400U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT          8
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK           0x00000100U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31017,8 +31151,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT          11
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK           0x00000800U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT          9
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK           0x00000200U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31027,8 +31161,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT          12
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK           0x00001000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT          10
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK           0x00000400U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31037,8 +31171,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT          13
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK           0x00002000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT          11
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK           0x00000800U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+--- psu_init.tcl
++++ psu_init.tcl
+@@ -4814,11 +4814,11 @@
+ 		# Register : GPR1 @ 0XFD0800C4</p>
+ 
+ 		# General Purpose Register 1
+-		# PSU_DDR_PHY_GPR1_GPR1                                                           0xe3
++		# PSU_DDR_PHY_GPR1_GPR1                                                           0xde
+ 
+ 		# General Purpose Register 1
+-		#(OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000E3U)  */
+-    mask_write 0XFD0800C4 0xFFFFFFFF 0x000000E3
++		#(OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000DEU)  */
++    mask_write 0XFD0800C4 0xFFFFFFFF 0x000000DE
+ 		# Register : DCR @ 0XFD080100</p>
+ 
+ 		# DDR4 Gear Down Timing.
+@@ -6992,14 +6992,14 @@
+ 		# PSU_DDR_PHY_DX2GCR4_RESERVED_7_6                                                0x0
+ 
+ 		# VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-		# PSU_DDR_PHY_DX2GCR4_DXREFIEN                                                    0x1
++		# PSU_DDR_PHY_DX2GCR4_DXREFIEN                                                    0xf
+ 
+ 		# VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+ 		# PSU_DDR_PHY_DX2GCR4_DXREFIMON                                                   0x0
+ 
+ 		# DATX8 n General Configuration Register 4
+-		#(OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B004U)  */
+-    mask_write 0XFD080910 0xFFFFFFFF 0x0E00B004
++		#(OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B03CU)  */
++    mask_write 0XFD080910 0xFFFFFFFF 0x0E00B03C
+ 		# Register : DX2GCR5 @ 0XFD080914</p>
+ 
+ 		# Reserved. Returns zeros on reads.
+@@ -7245,7 +7245,7 @@
+ 		# PSU_DDR_PHY_DX3GCR4_RESERVED_7_6                                                0x0
+ 
+ 		# VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-		# PSU_DDR_PHY_DX3GCR4_DXREFIEN                                                    0x1
++		# PSU_DDR_PHY_DX3GCR4_DXREFIEN                                                    0xf
+ 
+ 		# VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+ 		# PSU_DDR_PHY_DX3GCR4_DXREFIMON                                                   0x0
+@@ -9786,6 +9786,50 @@
+ 		# DATX8 0-1 I/O Configuration Register
+ 		#(OFFSET, MASK, VALUE)      (0XFD081530, 0xFFFFFFFFU ,0x70400000U)  */
+     mask_write 0XFD081530 0xFFFFFFFF 0x70400000
++		# Register : DX8SLbPLLCR0 @ 0XFD0817C4</p>
++
++		# PLL Bypass
++		# PSU_DDR_PHY_DX8SLBPLLCR0_PLLBYP                                                 0x0
++
++		# PLL Reset
++		# PSU_DDR_PHY_DX8SLBPLLCR0_PLLRST                                                 0x0
++
++		# PLL Power Down
++		# PSU_DDR_PHY_DX8SLBPLLCR0_PLLPD                                                  0x0
++
++		# Reference Stop Mode
++		# PSU_DDR_PHY_DX8SLBPLLCR0_RSTOPM                                                 0x0
++
++		# PLL Frequency Select
++		# PSU_DDR_PHY_DX8SLBPLLCR0_FRQSEL                                                 0x2
++
++		# Relock Mode
++		# PSU_DDR_PHY_DX8SLBPLLCR0_RLOCKM                                                 0x0
++
++		# Charge Pump Proportional Current Control
++		# PSU_DDR_PHY_DX8SLBPLLCR0_CPPC                                                   0x9
++
++		# Charge Pump Integrating Current Control
++		# PSU_DDR_PHY_DX8SLBPLLCR0_CPIC                                                   0x0
++
++		# Gear Shift
++		# PSU_DDR_PHY_DX8SLBPLLCR0_GSHIFT                                                 0x0
++
++		# Reserved. Return zeroes on reads.
++		# PSU_DDR_PHY_DX8SLBPLLCR0_RESERVED_11_9                                          0x0
++
++		# Analog Test Enable (ATOEN)
++		# PSU_DDR_PHY_DX8SLBPLLCR0_ATOEN                                                  0x0
++
++		# Analog Test Control
++		# PSU_DDR_PHY_DX8SLBPLLCR0_ATC                                                    0x0
++
++		# Digital Test Control
++		# PSU_DDR_PHY_DX8SLBPLLCR0_DTC                                                    0x0
++
++		# DAXT8 0-8 PLL Control Register 0
++		#(OFFSET, MASK, VALUE)      (0XFD0817C4, 0xFFFFFFFFU ,0x02120000U)  */
++    mask_write 0XFD0817C4 0xFFFFFFFF 0x02120000   
+ 		# Register : DX8SLbDQSCTL @ 0XFD0817DC</p>
+ 
+ 		# Reserved. Return zeroes on reads.                                        1
+@@ -13204,8 +13248,8 @@
+ 
+ 		# When set, this enables mio_bank1_pullupdown to selects pull up or pull d
+     # own for MIO Bank 1 - control MIO[51:26]
+-		#(OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x03F03FBEU)  */
+-    mask_write 0XFF180164 0x03FFFFFF 0x03F03FBE
++		#(OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x02FC0FEFU)  */
++    mask_write 0XFF180164 0x03FFFFFF 0x02FC0FEF
+ 		# Register : bank1_ctrl6 @ 0XFF180168</p>
+ 
+ 		# Each bit applies to a single IO. Bit 0 for MIO[26]. 
+		
+--- psu_init_gpl.c
++++ psu_init_gpl.c
+@@ -5864,12 +5864,12 @@
+     * Register : GPR1 @ 0XFD0800C4
+ 
+     * General Purpose Register 1
+-    *  PSU_DDR_PHY_GPR1_GPR1                                       0xe3
++    *  PSU_DDR_PHY_GPR1_GPR1                                       0xde
+ 
+     * General Purpose Register 1
+-    * (OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000E3U)
++    * (OFFSET, MASK, VALUE)      (0XFD0800C4, 0xFFFFFFFFU ,0x000000DEU)
+     */
+-	PSU_Mask_Write(DDR_PHY_GPR1_OFFSET, 0xFFFFFFFFU, 0x000000E3U);
++	PSU_Mask_Write(DDR_PHY_GPR1_OFFSET, 0xFFFFFFFFU, 0x000000DEU);
+ /*##################################################################### */
+ 
+     /*
+@@ -8298,15 +8298,15 @@
+     *  PSU_DDR_PHY_DX2GCR4_RESERVED_7_6                            0x0
+ 
+     * VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-    *  PSU_DDR_PHY_DX2GCR4_DXREFIEN                                0x1
++    *  PSU_DDR_PHY_DX2GCR4_DXREFIEN                                0xf
+ 
+     * VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+     *  PSU_DDR_PHY_DX2GCR4_DXREFIMON                               0x0
+ 
+     * DATX8 n General Configuration Register 4
+-    * (OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B004U)
++    * (OFFSET, MASK, VALUE)      (0XFD080910, 0xFFFFFFFFU ,0x0E00B03CU)
+     */
+-	PSU_Mask_Write(DDR_PHY_DX2GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B004U);
++	PSU_Mask_Write(DDR_PHY_DX2GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B03CU);
+ /*##################################################################### */
+ 
+     /*
+@@ -8575,15 +8575,15 @@
+     *  PSU_DDR_PHY_DX3GCR4_RESERVED_7_6                            0x0
+ 
+     * VREF Enable control for DQ IO (Single Ended) buffers of a byte lane.
+-    *  PSU_DDR_PHY_DX3GCR4_DXREFIEN                                0x1
++    *  PSU_DDR_PHY_DX3GCR4_DXREFIEN                                0xf
+ 
+     * VRMON control for DQ IO (Single Ended) buffers of a byte lane.
+     *  PSU_DDR_PHY_DX3GCR4_DXREFIMON                               0x0
+ 
+     * DATX8 n General Configuration Register 4
+-    * (OFFSET, MASK, VALUE)      (0XFD080A10, 0xFFFFFFFFU ,0x0E00B004U)
++    * (OFFSET, MASK, VALUE)      (0XFD080A10, 0xFFFFFFFFU ,0x0E00B03CU)
+     */
+-	PSU_Mask_Write(DDR_PHY_DX3GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B004U);
++	PSU_Mask_Write(DDR_PHY_DX3GCR4_OFFSET, 0xFFFFFFFFU, 0x0E00B03CU);
+ /*##################################################################### */
+ 
+     /*
+
+@@ -15242,10 +15291,10 @@
+ 
+     * When set, this enables mio_bank1_pullupdown to selects pull up or pull d
+     * own for MIO Bank 1 - control MIO[51:26]
+-    * (OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x03F03FBEU)
++    * (OFFSET, MASK, VALUE)      (0XFF180164, 0x03FFFFFFU ,0x02FC0FEFU)
+     */
+ 	PSU_Mask_Write(IOU_SLCR_BANK1_CTRL5_OFFSET,
+-		0x03FFFFFFU, 0x03F03FBEU);
++		0x03FFFFFFU, 0x02FC0FEFU);
+ /*##################################################################### */
+ 
+     /*
+
+--- psu_init_gpl.h
++++ psu_init_gpl.h
+@@ -2924,6 +2924,8 @@
+ #define DDR_PHY_DX8SL4DXCTL2_OFFSET                                                0XFD08152C
+ #undef DDR_PHY_DX8SL4IOCR_OFFSET 
+ #define DDR_PHY_DX8SL4IOCR_OFFSET                                                  0XFD081530
++#undef DDR_PHY_DX8SLBPLLCR0_OFFSET 
++#define DDR_PHY_DX8SLBPLLCR0_OFFSET                                                0XFD0817C4
+ #undef DDR_PHY_DX8SLBDQSCTL_OFFSET 
+ #define DDR_PHY_DX8SLBDQSCTL_OFFSET                                                0XFD0817DC
+
+@@ -30793,7 +30921,6 @@
+ #define IOU_SLCR_BANK1_CTRL3_SCHMITT_CMOS_N_BIT_25_DEFVAL      
+ #define IOU_SLCR_BANK1_CTRL3_SCHMITT_CMOS_N_BIT_25_SHIFT       25
+ #define IOU_SLCR_BANK1_CTRL3_SCHMITT_CMOS_N_BIT_25_MASK        0x02000000U
+-
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+ */
+@@ -30801,8 +30928,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT           14
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK            0x00004000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_SHIFT           12
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_0_MASK            0x00001000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30811,8 +30938,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT           15
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK            0x00008000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_SHIFT           13
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_1_MASK            0x00002000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30821,8 +30948,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT           16
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK            0x00010000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_SHIFT           14
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_2_MASK            0x00004000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30831,8 +30958,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT           17
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK            0x00020000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_SHIFT           15
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_3_MASK            0x00008000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30841,8 +30968,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT           18
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK            0x00040000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_SHIFT           16
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_4_MASK            0x00010000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30851,8 +30978,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT           19
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK            0x00080000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_SHIFT           17
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_5_MASK            0x00020000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30861,8 +30988,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT           20
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK            0x00100000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_SHIFT           18
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_6_MASK            0x00040000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30871,8 +30998,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT           21
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK            0x00200000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_SHIFT           19
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_7_MASK            0x00080000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30881,8 +31008,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT           22
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK            0x00400000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_SHIFT           20
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_8_MASK            0x00100000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30891,8 +31018,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_DEFVAL          
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT           23
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK            0x00800000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_SHIFT           21
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_9_MASK            0x00200000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30901,8 +31028,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT          24
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK           0x01000000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_SHIFT          22
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_10_MASK           0x00400000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30911,8 +31038,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT          25
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK           0x02000000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_SHIFT          23
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_11_MASK           0x00800000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30921,8 +31048,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT          0
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK           0x00000001U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_SHIFT          24
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_12_MASK           0x01000000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30931,8 +31058,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT          1
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK           0x00000002U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_SHIFT          25
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_13_MASK           0x02000000U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30941,8 +31068,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT          2
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK           0x00000004U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_SHIFT          0
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_14_MASK           0x00000001U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30951,8 +31078,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT          3
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK           0x00000008U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_SHIFT          1
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_15_MASK           0x00000002U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30961,8 +31088,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT          4
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK           0x00000010U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_SHIFT          2
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_16_MASK           0x00000004U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30971,8 +31098,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT          5
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK           0x00000020U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_SHIFT          3
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_17_MASK           0x00000008U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30981,8 +31108,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT          6
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK           0x00000040U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_SHIFT          4
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_18_MASK           0x00000010U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -30991,8 +31118,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT          7
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK           0x00000080U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_SHIFT          5
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_19_MASK           0x00000020U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31001,8 +31128,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT          8
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK           0x00000100U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_SHIFT          6
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_20_MASK           0x00000040U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31011,8 +31138,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT          9
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK           0x00000200U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_SHIFT          7
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_21_MASK           0x00000080U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31021,8 +31148,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT          10
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK           0x00000400U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_SHIFT          8
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_22_MASK           0x00000100U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31031,8 +31158,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT          11
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK           0x00000800U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_SHIFT          9
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_23_MASK           0x00000200U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31041,8 +31168,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT          12
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK           0x00001000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_SHIFT          10
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_24_MASK           0x00000400U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+@@ -31051,8 +31178,8 @@
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT 
+ #undef IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK 
+ #define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_DEFVAL         
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT          13
+-#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK           0x00002000U
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_SHIFT          11
++#define IOU_SLCR_BANK1_CTRL5_PULL_ENABLE_BIT_25_MASK           0x00000800U
+ 
+ /*
+ * Each bit applies to a single IO. Bit 0 for MIO[26].
+
+

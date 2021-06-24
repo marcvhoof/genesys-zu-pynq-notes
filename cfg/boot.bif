@@ -1,0 +1,9 @@
+the_ROM_image:
+{
+ [pmufw_image] pmu.elf
+ [bootloader, destination_cpu = a53-0] fsbl.elf
+ [destination_device=pl] system.bit
+ [destination_cpu=a53-0,exception_level=el-3,trustzone] bl31.elf
+ [destination_cpu=a53-0, load=0x00100000] devicetree.dtb
+ [destination_cpu=a53-0,exception_level=el-2] u-boot.elf
+}

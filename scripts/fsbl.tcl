@@ -15,6 +15,5 @@ hsi create_sw_design -proc $proc_name -os standalone fsbl
 hsi add_library xilffs
 hsi add_library xilrsa
 
-hsi generate_app -proc $proc_name -app zynq_fsbl -dir $fsbl_path -compile
-
+hsi generate_app -proc $proc_name -app zynqmp_fsbl -dir $fsbl_path
 hsi close_hw_design [hsi current_hw_design]

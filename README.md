@@ -1,7 +1,5 @@
-[![DOI](https://zenodo.org/badge/28404370.svg)](https://zenodo.org/badge/latestdoi/28404370)
+# Genesys ZU Notes
 
-# Red Pitaya Notes
-
-Notes on the Red Pitaya Open Source Instrument
+Notes on the Genesys ZU, following the methodology of Pavel Demin's Red Pitaya implementation:
 
 http://pavel-demin.github.io/red-pitaya-notes/

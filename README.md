@@ -21,7 +21,7 @@ sudo apt-get --no-install-recommends install \
 sudo ln -s make /usr/bin/gmake
 ```
 
-# 2. First set up your environment
+# 2. Set up your environment
 ```
 source /opt/Xilinx/Vitis/2020.2/settings64.sh
 ```

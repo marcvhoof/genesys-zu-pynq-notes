@@ -28,7 +28,8 @@ module axis_zmod_adc #
     for(j = 0; j < ADC_DATA_WIDTH; j = j + 1)
     begin : ADC_DATA
       IDDR #(
-        .DDR_CLK_EDGE("SAME_EDGE_PIPELINED")
+        .DDR_CLK_EDGE("SAME_EDGE_PIPELINED"),
+        .SRTYPE ("ASYNC" )
       ) IDDR_inst (
         .Q1(int_data_a_wire[j]),
         .Q2(int_data_b_wire[j]),

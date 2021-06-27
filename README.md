@@ -39,8 +39,8 @@ make NAME=led_blinker all
 ```
 sudo sh scripts/image.sh scripts/debian.sh genesys-zu-debian-arm64.img 1024
 ```
-# 6. Burn to a big enough SD Card
-Use your favourite image maker. For example Ubuntu's start up image maker. 
+# 6. Burn to a fast SD Card
+Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 (1024 megabytes) or use gparted afterwards. Genesys ZU supports the UHS-I 104MB/s mode. 
 
 ## Port of Pavel Demin's work and other sources
 Notes on the Genesys ZU, following the methodology of Pavel Demin's Red Pitaya implementation:

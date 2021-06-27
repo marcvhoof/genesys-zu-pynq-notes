@@ -2,7 +2,7 @@
 
 
 ## Why? 
-Current Genesys ZU sources are meant for the Vivado 2019 suite. No updates were provided, while interesting new IP became available over the years. Just upgrading the version did not work out of the box. The Petalinux implementation is complete. However, the ease of use of Pavel Demin's way of working with building FPGA sources and Linux is in my opinion unmatched. It is straightforward and the code is easy to maintain over time. It allows a beginner to catch on, and an expert to focus on a a straightforward implementation of their FPGA project. The clarity of the source code tree allows for (partial) re-use and easy spread.   
+Current Genesys ZU sources are meant for the Vivado 2019 suite. No updates were provided, while interesting new IP became available over the years. Just upgrading the version did not work out of the box. The Petalinux implementation is complete. However, the ease of use of [Pavel Demin's way of working](http://pavel-demin.github.io/red-pitaya-notes/) with building FPGA sources and Linux is in my opinion unmatched. It is straightforward and the code is easy to maintain over time. It allows a beginner to catch on, and an expert to focus on a a straightforward implementation of their FPGA project. The clarity of the source code tree allows for (partial) re-use and easy spread.   
 
 ## Getting started
 These commands should be the only ones you need to build your image. You do need to install [Xilinx Vitis](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html).

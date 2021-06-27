@@ -1569,9 +1569,6 @@ set_property -dict [ list \
  CONFIG.USB1_BOARD_INTERFACE {custom} \
  ] $ps_0
  
- #connect clock
-connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins ps_0/maxihpm0_lpd_aclk] [get_bd_pins ps_0/pl_clk0] [get_bd_pins ps_0/saxihpc0_fpd_aclk]
-
 #connect DP
 connect_bd_net -net zynq_ultra_ps_e_0_dp_aux_data_out [get_bd_ports dp_aux_dout] [get_bd_pins ps_0/dp_aux_data_out]
 connect_bd_net -net dp_hot_plug_detect_0_1 [get_bd_ports dp_aux_hotplug_detect] [get_bd_pins ps_0/dp_hot_plug_detect]

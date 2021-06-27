@@ -1,6 +1,9 @@
 # Create processing_system8 (MPSOC) and Genesys ZU board specifics
 source cfg/essentials.tcl
 
+#connect clock
+connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins ps_0/maxihpm0_lpd_aclk] [get_bd_pins ps_0/pl_clk0] [get_bd_pins ps_0/saxihpc0_fpd_aclk]
+
 # Create xlconstant
 cell xilinx.com:ip:xlconstant const_0
 

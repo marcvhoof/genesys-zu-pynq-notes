@@ -107,7 +107,7 @@ dpkg-reconfigure --frontend=noninteractive tzdata
 apt-get -y install openssh-server ca-certificates ntp ntpdate fake-hwclock \
   usbutils psmisc lsof parted curl vim wpasupplicant hostapd isc-dhcp-server \
   iw firmware-realtek firmware-ralink firmware-atheros firmware-brcm80211 \
-  ifplugd ntfs-3g net-tools less
+  ifplugd ntfs-3g net-tools less build-essential
 
 sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' etc/ssh/sshd_config
 

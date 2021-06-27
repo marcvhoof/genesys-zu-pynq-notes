@@ -48,7 +48,8 @@ module axis_zmod_dac #
 
   ODDR #(
     .DDR_CLK_EDGE("SAME_EDGE"),
-    .INIT(1'b0)
+    .INIT(1'b0),
+    .SRTYPE ("ASYNC" )
   ) ODDR_clk (
     .Q(dac_clk),
     .D1(1'b1),
@@ -64,7 +65,8 @@ module axis_zmod_dac #
     begin : DAC_DATA
       ODDR #(
         .DDR_CLK_EDGE("SAME_EDGE"),
-        .INIT(1'b0)
+        .INIT(1'b0),
+        .SRTYPE ("ASYNC" )
       ) ODDR_inst (
         .Q(dac_data[j]),
         .D1(int_data_a_reg[j]),

@@ -1,0 +1,33 @@
+### ZMOD A - DAC
+set_property IOSTANDARD LVCMOS18 [get_ports {dac_data_o[*]}]
+
+set_property PACKAGE_PIN AD12 [get_ports {dac_data_o[0]}]
+set_property PACKAGE_PIN AF10 [get_ports {dac_data_o[1]}]
+set_property PACKAGE_PIN V8 [get_ports {dac_data_o[2]}]
+set_property PACKAGE_PIN AF11 [get_ports {dac_data_o[3]}]
+set_property PACKAGE_PIN AE10 [get_ports {dac_data_o[4]}]
+set_property PACKAGE_PIN AC12 [get_ports {dac_data_o[5]}]
+set_property PACKAGE_PIN V9 [get_ports {dac_data_o[6]}]
+set_property PACKAGE_PIN U9 [get_ports {dac_data_o[7]}]
+set_property PACKAGE_PIN AG5 [get_ports {dac_data_o[8]}]
+set_property PACKAGE_PIN AG6 [get_ports {dac_data_o[9]}]
+set_property PACKAGE_PIN AF5 [get_ports {dac_data_o[10]}]
+set_property PACKAGE_PIN AE5 [get_ports {dac_data_o[11]}]
+set_property PACKAGE_PIN AF2 [get_ports {dac_data_o[12]}]
+set_property PACKAGE_PIN AE2 [get_ports {dac_data_o[13]}]
+
+set_property IOSTANDARD LVCMOS18 [get_ports dac_clk_o]
+set_property PACKAGE_PIN W8 [get_ports dac_clk_o]
+
+set_property IOSTANDARD LVCMOS18 [get_ports {dac_spi_o[*]}]
+
+set_property PACKAGE_PIN AD7 [get_ports {dac_spi_o[0]}]
+set_property PACKAGE_PIN AF3 [get_ports {dac_spi_o[1]}]
+set_property PACKAGE_PIN AE7 [get_ports {dac_spi_o[2]}]
+
+set_property IOSTANDARD LVCMOS18 [get_ports {dac_cfg_o[*]}]
+
+set_property PACKAGE_PIN U8 [get_ports {dac_cfg_o[0]}]
+set_property PACKAGE_PIN AB1 [get_ports {dac_cfg_o[1]}]
+set_property PACKAGE_PIN AC1 [get_ports {dac_cfg_o[2]}]
+set_property PACKAGE_PIN AE3 [get_ports {dac_cfg_o[3]}]

@@ -48,50 +48,6 @@
  
  	/*
  	 * Set SODIMM control address to enable access to lower
---- xfsbl_config.h
-+++ xfsbl_config.h
-@@ -85,10 +85,10 @@ extern "C" {
-  *     - FSBL_DEBUG_DETAILED Defining this will print information with
-  *       all data exchanged.
-  */
--#define FSBL_PRINT_VAL              (1U)
-+#define FSBL_PRINT_VAL              (0U)
- #define FSBL_DEBUG_VAL              (0U)
- #define FSBL_DEBUG_INFO_VAL         (0U)
--#define FSBL_DEBUG_DETAILED_VAL     (0U)
-+#define FSBL_DEBUG_DETAILED_VAL     (1U)
- 
- /**
-  * FSBL Debug options
-@@ -131,20 +131,20 @@ extern "C" {
-  *     - FSBL_FORCE_ENC_EXCLUDE_VAL Forcing encryption for every partition
-  *       when ENC only bit is blown will be excluded.
-  */
--#define FSBL_NAND_EXCLUDE_VAL			(0U)
-+#define FSBL_NAND_EXCLUDE_VAL			(1U)
- #define FSBL_QSPI_EXCLUDE_VAL			(0U)
--#define FSBL_SD_EXCLUDE_VAL			(0U)
--#define FSBL_SECURE_EXCLUDE_VAL			(0U)
-+#define FSBL_SD_EXCLUDE_VAL				(0U)
-+#define FSBL_SECURE_EXCLUDE_VAL			(1U)
- #define FSBL_BS_EXCLUDE_VAL				(0U)
- #define FSBL_EARLY_HANDOFF_EXCLUDE_VAL	(1U)
--#define FSBL_WDT_EXCLUDE_VAL			(0U)
-+#define FSBL_WDT_EXCLUDE_VAL			(1U)
- #define FSBL_PERF_EXCLUDE_VAL			(1U)
- #define FSBL_A53_TCM_ECC_EXCLUDE_VAL	(1U)
- #define FSBL_PL_CLEAR_EXCLUDE_VAL		(1U)
- #define FSBL_USB_EXCLUDE_VAL			(1U)
- #define FSBL_PROT_BYPASS_EXCLUDE_VAL	(1U)
- #define FSBL_PARTITION_LOAD_EXCLUDE_VAL (0U)
--#define FSBL_FORCE_ENC_EXCLUDE_VAL		(0U)
-+#define FSBL_FORCE_ENC_EXCLUDE_VAL		(1U)
- #define FSBL_DDR_SR_EXCLUDE_VAL			(1U)
- 
- #if FSBL_NAND_EXCLUDE_VAL
- diff --git spi_gpio.c
-new file mode 100644
-index 000000000..48d2c88d4
 --- /dev/null
 +++ spi_gpio.c
 @@ -0,0 +1,180 @@
@@ -477,3 +433,135 @@ index 7589f3a3e..55e8d60d1 100644
  u32 XFsbl_BoardInit(void);
  
  #ifdef __cplusplus
+ 
+--- spi_gpio.c
++++ spi_gpio.c
+@@ -22,6 +22,9 @@
+  *
+  *  Created on: Oct 28, 2019
+  *      Author: Elod Gyorgy
++ *
++ *  Changelog:
++ *  	March 22, 2021	- Optimizations for code size
+  */
+ 
+ #include "spi_gpio.h"
+@@ -39,23 +42,23 @@
+ 
+ struct prescale_t
+ {
+-	u32 div;
++	u8 div;
+ 	u8 prescale;
+ };
+ static const struct prescale_t prescalers[] =
+ {
+-		{4, XSPIPS_CLK_PRESCALE_4},
+-		{8, XSPIPS_CLK_PRESCALE_8},
+-		{16, XSPIPS_CLK_PRESCALE_16},
+-		{32, XSPIPS_CLK_PRESCALE_32},
+-		{64, XSPIPS_CLK_PRESCALE_64},
+-		{128, XSPIPS_CLK_PRESCALE_128},
+-		{256, XSPIPS_CLK_PRESCALE_256}
++		{4-1, XSPIPS_CLK_PRESCALE_4},
++		{8-1, XSPIPS_CLK_PRESCALE_8},
++		{16-1, XSPIPS_CLK_PRESCALE_16},
++		{32-1, XSPIPS_CLK_PRESCALE_32},
++		{64-1, XSPIPS_CLK_PRESCALE_64},
++		{128-1, XSPIPS_CLK_PRESCALE_128},
++		{256-1, XSPIPS_CLK_PRESCALE_256}
+ };
+ 
+ static XSpiPs drv_inst;
+-static u8 send_buf_[8];
+-static u8 recv_buf_[8];
++static u8 send_buf_[3];
++static u8 recv_buf_[3];
+ 
+ /*
+  * @param dev_id SPI controller Device ID
+@@ -102,7 +105,7 @@ XStatus SpiGpioInit(u32 dev_id, u8 ss_id)
+ 	size_t i;
+ 	for (i=0; i<sizeof(prescalers)/sizeof(prescalers[0]); ++i)
+ 	{
+-		if (SpiConfig->InputClockHz / prescalers[i].div <= SCLK_MAX_FREQ)
++		if (SpiConfig->InputClockHz / (prescalers[i].div+1) <= SCLK_MAX_FREQ)
+ 			break;
+ 	}
+ 
+
+--- xfsbl_ddr_init.c
++++ xfsbl_ddr_init.c
+@@ -718,7 +718,7 @@
+ 
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670))
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU))
+ /*****************************************************************************/
+ /**
+  * This function computes DIMM parameters based upon the SPD information.
+@@ -1895,7 +1895,7 @@
+ 
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670))
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU))
+ /*****************************************************************************/
+ /**
+  * This function calculates the DDRC register values for DDR3
+@@ -2967,7 +2967,7 @@
+ 
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670))
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU))
+ /*****************************************************************************/
+ /**
+  * This function calculates and writes DDR controller registers
+@@ -3438,7 +3438,7 @@
+ 
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670))
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU))
+ /*****************************************************************************/
+ /**
+  * This function calculates the PHY register values for DDR3
+@@ -5198,7 +5198,7 @@
+ 
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670))
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU))
+ /*****************************************************************************/
+ /**
+  * This function calculates and writes the DDR-PHY registers
+@@ -6522,7 +6522,7 @@
+ 
+ #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670)
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU)
+ /*****************************************************************************/
+ /**
+  * This function calculates and writes DDR controller registers
+@@ -6799,7 +6799,7 @@
+ #if !(defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+ 	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670)) \
+-	|| defined(XFSBL_ENABLE_DDR_SR)
++	|| defined(XFSBL_ENABLE_DDR_SR) || defined(XPS_BOARD_GZU)
+ 	u32 RegVal;
+ #endif
+ 
+@@ -6818,7 +6818,7 @@
+ 
+ #if defined(XPS_BOARD_ZCU102) || defined(XPS_BOARD_ZCU106) \
+ 	|| defined(XPS_BOARD_ZCU111) || defined(XPS_BOARD_ZCU216) \
+-	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670)
++	|| defined(XPS_BOARD_ZCU208) || defined(XPS_BOARD_ZCU670) || defined(XPS_BOARD_GZU)
+ 	/* ZCU102, ZCU106 and ZCU111, ZCU216, ZCU208 and ZCU670 Boards have
+ 	 * support only for DDR4 DIMMs. Skip checking for DDR type for these
+ 	 * boards.
+

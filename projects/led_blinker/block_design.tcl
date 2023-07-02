@@ -40,33 +40,6 @@ cell pavel-demin:user:axi_cfg_register cfg_0 {
 # Create all required interconnections
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {/pll_0/clk_out1 (100 MHz)} Clk_xbar {Auto} Master {/ps_0/M_AXI_HPM0_LPD} Slave {cfg_0/S_AXI} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins cfg_0/S_AXI]
 
-
-# PREREQUISITES WHEN USING ADC IN XDC FILE
-# ADC
-
-# Create clk_wiz
-cell xilinx.com:ip:clk_wiz pll_1 {
-  PRIMITIVE PLL
-  PRIM_IN_FREQ.VALUE_SRC USER
-  PRIM_IN_FREQ 100.0
-  CLKOUT1_USED true
-  CLKOUT1_REQUESTED_OUT_FREQ 100.0
-  JITTER_SEL Min_O_Jitter
-  JITTER_OPTIONS PS
-  CLKIN1_UI_JITTER 600
-  USE_RESET false
-} {
-  clk_in1 ps_0/pl_clk0
-}
-
-# Create util_ds_buf
-cell xilinx.com:ip:util_ds_buf obufds_0 {
-  C_BUF_TYPE OBUFDS
-} {
-  OBUF_IN pll_1/clk_out1
-  OBUF_DS_N adc_clk_n_o
-  OBUF_DS_P adc_clk_p_o
-}
 ########################
 # APPLICATION SPECIFIC #
 ########################

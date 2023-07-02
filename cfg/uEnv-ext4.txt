@@ -9,4 +9,4 @@ devicetree_load_address=0x4000000
 
 bootcmd=fatload mmc 0 ${kernel_load_address} ${kernel_image} && fatload mmc 0 ${devicetree_load_address} ${devicetree_image} && booti ${kernel_load_address} - ${devicetree_load_address}
 
-bootargs=console=ttyPS0,115200 root=/dev/mmcblk0p2 ro rootfstype=ext4 clk_ignore_unused rootwait cma=36M
+bootargs=console=ttyPS0,115200 root=/dev/mmcblk0p2 ro rootfstype=ext4 clk_ignore_unused rootwait cma=256M

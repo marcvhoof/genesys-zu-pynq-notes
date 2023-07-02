@@ -4,9 +4,11 @@
 # You need to set NAME, PART and PROC for your project.
 # NAME is the base name for most of the generated files.
 
-NAME = led_blinker
-PART = xczu3eg-sfvc784-1-e
-PROC = psu_cortexa53_0
+NAME   = led_blinker
+PART   = xczu3eg-sfvc784-1-e
+PROC   = psu_cortexa53_0
+BOARD  = gzu_3eg
+VITISV = 2022.1
 
 CORES = axi_axis_reader_v1_0 axi_axis_writer_v1_0 axi_bram_reader_v1_0 \
   axi_bram_writer_v1_0 axi_cfg_register_v1_0 axi_sts_register_v1_0 \
@@ -22,21 +24,24 @@ CORES = axi_axis_reader_v1_0 axi_axis_writer_v1_0 axi_bram_reader_v1_0 \
   axis_stepper_v1_0 axis_tagger_v1_0 axis_timer_v1_0 axis_trigger_v1_0 \
   axis_validator_v1_0 axis_variable_v1_0 axis_variant_v1_0 axis_zeroer_v1_0 \
   dna_reader_v1_0 edge_detector_v1_0 gpio_debouncer_v1_0 port_selector_v1_0 \
-  port_slicer_v1_0 pulse_generator_v1_0 shift_register_v1_0 axis_spi_v1_0
+  port_slicer_v1_0 pulse_generator_v1_0 shift_register_v1_0 axis_spi_v1_0 axis_multiport_acc_v1_0
 
 VIVADO = vivado -nolog -nojournal -mode batch
 XSCT = xsct
 RM = rm -rf
+DOCKERID := $(shell docker ps -a -q)
 
-UBOOT_TAG = xilinx-v2020.2
-LINUX_TAG = xlnx_rebase_v5.4_ubuntu_20.04_p1
-DTREE_TAG = xilinx-v2020.2.2-k26
-ATF_TAG = xilinx-v2020.2.2-k26
+UBOOT_TAG = xilinx-v$(VITISV)
+LINUX_TAG = xlnx_rebase_v5.15_LTS_2022.1
+DTREE_TAG = xilinx_v$(VITISV)
+ATF_TAG = xilinx-v$(VITISV)
+XRT_TAG = 202210.2.13.466
 
 UBOOT_DIR = tmp/u-boot-xlnx-$(UBOOT_TAG)
 LINUX_DIR = tmp/linux-$(LINUX_TAG)
 DTREE_DIR = tmp/device-tree-xlnx-$(DTREE_TAG)
 ATF_DIR = tmp/arm-trusted-firmware-$(ATF_TAG)
+XRT_DIR = tmp/xrt-$(XRT_TAG)
 
 UBOOT_TAR = tmp/u-boot-xlnx-$(UBOOT_TAG).tar.gz
 LINUX_TAR = tmp/linux-$(LINUX_TAG).tar.xz
@@ -46,7 +51,7 @@ ATF_TAR = tmp/arm-trusted-firmware-$(DTREE_TAG).tar.gz
 UBOOT_URL = https://github.com/Xilinx/u-boot-xlnx/archive/$(UBOOT_TAG).tar.gz
 LINUX_URL = https://github.com/Xilinx/linux-xlnx/archive/refs/tags/$(LINUX_TAG).tar.gz
 DTREE_URL = https://github.com/Xilinx/device-tree-xlnx/archive/$(DTREE_TAG).tar.gz
-ATF_URL = https://github.com/Xilinx/arm-trusted-firmware/archive/$(ATF_TAG).tar.gz
+ATF_URL = https://github.com/Xilinx/arm-trusted-firmware/archive/refs/tags/$(ATF_TAG).tar.gz
 
 RTL8188_TAR = tmp/rtl8188eu-v5.2.2.4.tar.gz
 RTL8188_URL = https://github.com/lwfinger/rtl8188eu/archive/v5.2.2.4.tar.gz
@@ -64,6 +69,8 @@ xpr: tmp/$(NAME).xpr
 
 bit: tmp/$(NAME).bit
 
+dpu: tmp/dpu/$(NAME).xmodel
+
 $(UBOOT_TAR):
 	mkdir -p $(@D)
 	curl -L $(UBOOT_URL) -o $@
@@ -78,7 +85,7 @@ $(DTREE_TAR):
 
 $(ATF_TAR):
 	mkdir -p $(@D)
-	curl -L $(ATF_URL) -o $@
+	wget $(ATF_URL) -O $@
 
 $(RTL8188_TAR):
 	mkdir -p $(@D)
@@ -88,13 +95,17 @@ $(RTL8192_TAR):
 	mkdir -p $(@D)
 	curl -L $(RTL8192_URL) -o $@
 
+$(XRT_DIR): $(LINUX_DIR)
+	mkdir -p $(@D)
+	git clone https://github.com/Xilinx/XRT $@ -b $(XRT_TAG) --depth 1
+	make -C $(XRT_DIR)/src/runtime_src/core/edge/drm LINUXDIR=../../../../../../../$(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- modules
+	cp $(XRT_DIR)/src/runtime_src/core/edge/drm/zocl/zocl.ko $@
+
 $(UBOOT_DIR): $(UBOOT_TAR)
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
-	cp -a patches/zynqmp-genesyszu/. $@/arch/arm/dts/
-	cp -a patches/include/. $@/include/
 
-$(LINUX_DIR): $(LINUX_TAR) $(RTL8188_TAR) $(RTL8192_TAR)
+$(LINUX_DIR): $(LINUX_TAR) $(RTL8188_TAR) $(RTL8192_TAR) 
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
 	mkdir -p $@/drivers/net/wireless/realtek/rtl8188eu
@@ -113,8 +124,11 @@ $(ATF_DIR): $(ATF_TAR)
 Image: $(LINUX_DIR)
 	make -C $< ARCH=arm64 distclean
 	make -C $< ARCH=arm64 xilinx_zynqmp_defconfig
+	cp cfg/.config tmp/linux-$(LINUX_TAG)
 	patch -N --forward -p0 -d tmp/linux-$(LINUX_TAG) < patches/$(LINUX_TAG).patch
-	patch -p0 -d tmp/linux-$(LINUX_TAG) < patches/$(LINUX_TAG)_part2.patch
+	rm -r tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
+	mkdir -p tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
+	tar -zxf patches/microchip.tar --directory=tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
 	make -C $< ARCH=arm64 -j $(shell nproc 2> /dev/null || echo 1) \
 	  CROSS_COMPILE=aarch64-linux-gnu-   \
 	  Image modules
@@ -130,22 +144,25 @@ tmp/%.atf/bl31.elf: $(ATF_DIR)
 $(UBOOT_DIR)/u-boot.bin: $(UBOOT_DIR) devicetree.dtb
 	make -C $< ARCH=aarch64 distclean
 	make -C $< ARCH=aarch64 xilinx_zynqmp_virt_defconfig
+	rsync -vt tmp/$(NAME).tree/* $(UBOOT_DIR)/arch/arm/dts/
+	cp tmp/linux-$(LINUX_TAG)/include/dt-bindings/media/xilinx-vip.h  $(UBOOT_DIR)/arch/arm/dts/include/dt-bindings/media/xilinx-vip.h
+	cp tmp/$(NAME).tree/system-top.dts  $(UBOOT_DIR)/arch/arm/dts/genesyszu.dts
+	cp tmp/$(NAME).tree/genesyszu.dtsi  $(UBOOT_DIR)/arch/arm/dts/genesyszu.dtsi
 	patch -N --forward -d $(UBOOT_DIR) -p 0 < patches/uboot.patch
-	patch -N --forward -d tmp -p 0 < patches/u-boot-xlnx-$(UBOOT_TAG).patch
 	make -C $< -j $(shell nproc 2> /dev/null || echo 1) \
 	CROSS_COMPILE=aarch64-linux-gnu- CC=aarch64-linux-gnu-gcc all
 	cp $(ATF_DIR)/build/zynqmp/release/bl31/bl31.elf tmp/$(NAME).atf/bl31.elf
 	cp $(ATF_DIR)/build/zynqmp/release/bl31/bl31.elf bl31.elf
 	cp $(UBOOT_DIR)/u-boot.elf u-boot.elf
 
-boot.bin: tmp/$(NAME).fsbl/executable.elf tmp/$(NAME).atf/bl31.elf tmp/$(NAME).pmu/pmu.elf $(UBOOT_DIR)/u-boot.bin tmp/$(NAME).bit devicetree.dtb
+boot.bin: tmp/$(NAME).fsbl/executable.elf tmp/$(NAME).atf/bl31.elf tmp/$(NAME).pmu/pmu.elf $(UBOOT_DIR)/u-boot.bin tmp/$(NAME).bit devicetree.dtb $(XRT_DIR)
 	cp tmp/$(NAME).pmu/pmu.elf pmu.elf
 	cp tmp/$(NAME).fsbl/executable.elf fsbl.elf
 	cp tmp/$(NAME).bit system.bit
 	bootgen -arch zynqmp -image cfg/boot.bif -w -o $@
 
-devicetree.dtb: Image tmp/$(NAME).tree/system-top.dts
-	cpp -nostdinc -I include -I arch -undef -x assembler-with-cpp  tmp/$(NAME).tree/system-top.dts tmp/$(NAME).tree/system-top.dts.preprocessed
+devicetree.dtb: Image tmp/$(NAME).tree/system-top.dts 
+	cpp -nostdinc -I tmp/$(NAME).tree/include -I tmp/linux-$(LINUX_TAG)/include -I include -I arch -undef -x assembler-with-cpp  tmp/$(NAME).tree/system-top.dts tmp/$(NAME).tree/system-top.dts.preprocessed
 	$(LINUX_DIR)/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb \
 	  -i tmp/$(NAME).tree tmp/$(NAME).tree/system-top.dts.preprocessed
 
@@ -169,10 +186,6 @@ tmp/%.fsbl/executable.elf: tmp/%.xsa
 	mkdir -p $(@D)
 	$(XSCT) scripts/fsbl.tcl $* $(PROC)
 	patch -p0 -N --forward -d $(@D) -p 0 < patches/fsbl.patch
-	patch -p0 -N --forward -d tmp/$(NAME).fsbl < patches/fsbl_part2.patch
-	patch -p0 -N --forward -d tmp/$(NAME).fsbl < patches/fsbl_part3.patch
-	patch -p0 -N --forward -d tmp/$(NAME).hard < patches/psu.patch
-	patch -p0 -N --forward -d tmp/$(NAME).hard < patches/psu_part2.patch
 	make -C $(@D) ARCH=aarch64 CFLAGS=-DXPS_BOARD_GZU all
 	
 tmp/%.pmu/pmu.elf: tmp/%.xsa
@@ -182,15 +195,26 @@ tmp/%.pmu/pmu.elf: tmp/%.xsa
 
 tmp/%.tree/system-top.dts: tmp/%.xsa $(DTREE_DIR)
 	mkdir -p $(@D)
-	cp patches/zynqmp-genesyszu/genesyszu.dtsi $(DTREE_DIR)/device_tree/data/kernel_dtsi/2020.2/BOARD/genesyszu.dtsi
-	mkdir -p tmp/$(NAME).tree/include/dt-bindings/net/ 
-	mkdir -p tmp/$(NAME).tree/include/dt-bindings/media/ 
-	cp patches/include/dt-bindings/net/ti-dp83867.h  tmp/$(NAME).tree/include/dt-bindings/net/ti-dp83867.h
-	cp patches/include/dt-bindings/media/xilinx-vip.h tmp/$(NAME).tree/include/dt-bindings/media/xilinx-vip.h
+	cp cfg/genesyszu.dtsi $(DTREE_DIR)/device_tree/data/kernel_dtsi/$(VITISV)/BOARD/genesyszu.dtsi
 	$(XSCT) scripts/devicetree.tcl $* $(PROC) $(DTREE_DIR)
+	
+tmp/dpu/%.xmodel: 
+	mkdir -p $(@D)
+	cd $(@D) && git clone https://github.com/Xilinx/DPU-PYNQ.git
+	cp -r projects/dpu/$(BOARD) $(@D)/DPU-PYNQ/boards
+	cd $(@D)/DPU-PYNQ/boards && git clone https://github.com/Xilinx/XilinxBoardStore -b $(VITISV)
+	make -C $(@D)/DPU-PYNQ/boards BOARD=$(BOARD)
+	(cd $(@D)/DPU-PYNQ/host/; ./prepare_docker.sh)
+	#patch and cp the arch.json file to the mounted directory inside the container
+	patch -p0 -N --forward -d  $(@D)/DPU-PYNQ/host/ -p 0 < patches/docker/docker.patch
+	cp patches/docker/*.sh $(@D)/DPU-PYNQ/host/
+	cp $(@D)/DPU-PYNQ/boards/$(BOARD)/binary_container_1/link/vivado/vpl/prj/prj.gen/sources_1/bd/design_1/ip/design_1_DPUCZDX8G_1_0/arch.json $(@D)/DPU-PYNQ/host/
+	(cd $(@D)/DPU-PYNQ/host/; ./docker_run.sh xilinx/vitis-ai:2.5.0)
+	#the adapted docker_run.sh starts docker_script.sh which compiles resnet50 with pytorch
+	cp $(@D)/DPU-PYNQ/host/./tf2_resnet50.xmodel $(@D)/$(NAME).xmodel
 
 clean:
-	$(RM) Image boot.bin devicetree.dtb tmp fsbl.elf devicetree.dtb system.bit pmu.elf u-boot.elf bl31.elf
+	$(RM) Image boot.bin devicetree.dtb tmp fsbl.elf devicetree.dtb system.bit pmu.elf u-boot.elf bl31.elf zocl.ko
 	$(RM) .Xil usage_statistics_webtalk.html usage_statistics_webtalk.xml
 	$(RM) vivado*.jou vivado*.log
 	$(RM) webtalk*.jou webtalk*.log

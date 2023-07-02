@@ -1,72 +1,5 @@
---- .config
-+++ .config
-@@ -316,8 +316,14 @@
- #
- # Logging
- #
--# CONFIG_LOG is not set
-+CONFIG_LOG=y
-+# CONFIG_SPL_LOG is not set
-+# CONFIG_TPL_LOG is not set
-+CONFIG_LOG_MAX_LEVEL=8
--CONFIG_LOG_DEFAULT_LEVEL=6
-+CONFIG_LOG_DEFAULT_LEVEL=3
-+CONFIG_LOG_CONSOLE=y
-+# CONFIG_LOG_TEST is not set
-+# CONFIG_LOG_ERROR_RETURN is not set
- CONFIG_SUPPORT_RAW_INITRD=y
- CONFIG_DEFAULT_FDT_FILE=""
- # CONFIG_MISC_INIT_R is not set
-@@ -753,7 +753,7 @@
- # CONFIG_OF_EMBED is not set
- # CONFIG_OF_BOARD is not set
- # CONFIG_OF_PRIOR_STAGE is not set
--CONFIG_DEFAULT_DEVICE_TREE="zynqmp-zcu100-revC"
-+CONFIG_DEFAULT_DEVICE_TREE="xilinx-genesyszu"
--CONFIG_OF_LIST="avnet-ultra96-rev1 zynqmp-a2197-revA zynqmp-e-a2197-00-revA zynqmp-g-a2197-00-revA zynqmp-m-a2197-01-revA zynqmp-m-a2197-02-revA zynqmp-m-a2197-03-revA zynqmp-p-a2197-00-revA zynqmp-zc1232-revA zynqmp-zc1254-revA zynqmp-zc1751-xm015-dc1 zynqmp-zc1751-xm016-dc2 zynqmp-zc1751-xm017-dc3 zynqmp-zc1751-xm018-dc4 zynqmp-zc1751-xm019-dc5 zynqmp-zcu100-revC zynqmp-zcu102-rev1.0 zynqmp-zcu102-revA zynqmp-zcu102-revB zynqmp-zcu104-revA zynqmp-zcu104-revC zynqmp-zcu106-revA zynqmp-zcu111-revA zynqmp-zcu1275-revA zynqmp-zcu1275-revB zynqmp-zcu1285-revA zynqmp-zcu208-revA zynqmp-zcu216-revA"
-+CONFIG_OF_LIST="xilinx-genesyszu"
- # CONFIG_MULTI_DTB_FIT is not set
- # CONFIG_SPL_MULTI_DTB_FIT is not set
-@@ -1364,6 +1370,7 @@
- # CONFIG_XILINX_SPI is not set
- CONFIG_ZYNQ_SPI=y
- CONFIG_ZYNQMP_GQSPI=y
-+CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET=0x1fff000
- # CONFIG_SOFT_SPI is not set
- # CONFIG_FSL_ESPI is not set
- # CONFIG_FSL_QSPI is not set
 --- include/configs/xilinx_zynqmp.h
 +++ include/configs/xilinx_zynqmp.h
-@@ -52,6 +52,29 @@
- #endif
- 
- /* Miscellaneous configurable options */
-+//#define DFU_ALT_INFO_RAM \
-+//                "dfu_ram_info=" \
-+//        "setenv dfu_alt_info " \
-+//        "image.ub ram $netstart 0x1e00000\0" \
-+//        "dfu_ram=run dfu_ram_info && dfu 0 ram 0\0" \
-+//        "thor_ram=run dfu_ram_info && thordown 0 ram 0\0"
-+
-+//#define DFU_ALT_INFO_MMC \
-+//        "dfu_mmc_info=" \
-+//        "set dfu_alt_info " \
-+//        "${kernel_image} fat 0 1\\\\;" \
-+//        "dfu_mmc=run dfu_mmc_info && dfu 0 mmc 0\0" \
-+//        "thor_mmc=run dfu_mmc_info && thordown 0 mmc 0\0"
-+
-+/*Required for uartless designs */
-+#ifndef CONFIG_BAUDRATE
-+#define CONFIG_BAUDRATE 115200
-+#ifdef CONFIG_DEBUG_UART
-+#undef CONFIG_DEBUG_UART
-+#endif
-+#endif
-+
-+
- #define CONFIG_SYS_LOAD_ADDR		0x8000000
- 
- #if defined(CONFIG_ZYNQMP_USB)
 @@ -97,7 +120,7 @@
  # define PHY_ANEG_TIMEOUT       20000
  #endif
@@ -75,44 +8,30 @@
 +#define CONFIG_SYS_BOOTM_LEN	0xF000000
  
  #define CONFIG_CLOCKS
-
---- arch/arm/dts/Makefile
-+++ arch/arm/dts/Makefile
-@@ -263,6 +263,7 @@
- 	zynq-zybo.dtb \
- 	zynq-zybo-z7.dtb
- dtb-$(CONFIG_ARCH_ZYNQMP) += \
-+	xilinx-genesyszu.dtb			\
- 	avnet-ultra96-rev1.dtb			\
- 	avnet-ultrazedev-cc-v1.0-ultrazedev-som-v1.0.dtb	\
- 	zynqmp-a2197-revA.dtb			\
  
---- drivers/misc/Kconfig
-+++ drivers/misc/Kconfig
-@@ -249,6 +249,14 @@ config ZYNQ_GEM_I2C_MAC_OFFSET
- 	help
- 	  Set the MAC offset for i2C.
+--- common/main.c
++++ common/main.c
+@@ -59,6 +59,8 @@ void main_loop(void)
+ 	if (cli_process_fdt(&s))
+ 		cli_secure_boot_cmd(s);
  
-+config ZYNQ_GEM_SPI_MAC_OFFSET
-+	hex "Set the SPI MAC offset"
-+	default 0x0
-+	depends on DM_SPI
-+	help
-+	  Set the MAC offset for spi.
-+
-+
- if I2C_EEPROM
++	env_set("sdboot", "echo Importing environment from SD... && mmcinfo && load mmc 0 0x2000000 uEnv.txt && env import -t 0x2000000 ${filesize} && boot");
++	env_set("bootcmd", "run sdboot");
+ 	autoboot_command(s);
  
- config SYS_I2C_EEPROM_ADDR
+ 	cli_loop();
 
 --- board/xilinx/common/board.c
 +++ board/xilinx/common/board.c
-@@ -15,30 +15,33 @@
- #include <i2c_eeprom.h>
- #include <net.h>
+@@ -22,34 +22,36 @@
+ #include <linux/ctype.h>
+ 
+ #include "fru.h"
++#include <spi.h>
++#include <spi_flash.h>
++
  
 -#if defined(CONFIG_ZYNQ_GEM_I2C_MAC_OFFSET)
-+
  int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
  {
  	int ret = -EINVAL;
@@ -135,15 +54,13 @@
 -		debug("%s: I2C EEPROM MAC address read failed\n", __func__);
 -	else
 -		debug("%s: I2C EEPROM MAC %pM\n", __func__, ethaddr);
- 
-+#if defined(CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET)
-+	printf("Marc's debug line at SPI mac \n");
+-
 +	struct spi_flash *flash;
 +	flash = spi_flash_probe(CONFIG_SF_DEFAULT_BUS,
 +				CONFIG_SF_DEFAULT_CS,
-+				CONFIG_SF_DEFAULT_SPEED,
-+				CONFIG_SF_DEFAULT_MODE);
-+				
++				0,
++				0);
++
 +	if (!flash) {
 +		printf("no flash\n");
 +		printf("SPI(bus:%u cs:%u) probe failed\n",
@@ -151,20 +68,13 @@
 +			CONFIG_SF_DEFAULT_CS);
 +		return 0;
 +	}
-+	if (spi_flash_read(flash, CONFIG_ZYNQ_GEM_SPI_MAC_OFFSET, 6, ethaddr))
++
++	if (spi_flash_read(flash, 0x1fff000, 6, ethaddr))
 +		printf("%s:SPI MAC address read failed\n", __func__);
-+		
 +	printf("%s: SPI ethaddr: %02X:%02X:%02X:%02X:%02X:%02X\n", __func__, ethaddr[0], ethaddr[1], ethaddr[2], ethaddr[3], ethaddr[4], ethaddr[5]);
++ 
 +	if (flash)
 +		spi_flash_free(flash);
-+#endif
- 	return ret;
- }
- #endif
---- board/xilinx/common/board.c
-+++ board/xilinx/common/board.c
-@@ -44,7 +44,7 @@
- #endif
  	return ret;
  }
 -#endif
@@ -172,70 +82,113 @@
  
  #define EEPROM_HEADER_MAGIC		0xdaaddeed
  #define EEPROM_HDR_MANUFACTURER_LEN	16
+ 
+--- .config
++++ .config
+@@ -1340,7 +1340,7 @@
+ # CONFIG_SPI_FLASH_SFDP_SUPPORT is not set
+ CONFIG_SPI_FLASH_SMART_HWCAPS=y
+ # CONFIG_SPI_FLASH_SOFT_RESET is not set
+-# CONFIG_SPI_FLASH_BAR is not set
++CONFIG_SPI_FLASH_BAR=y
+ CONFIG_SPI_FLASH_UNLOCK_ALL=y
+ # CONFIG_SPI_FLASH_ATMEL is not set
+ # CONFIG_SPI_FLASH_EON is not set
+ 
+ --- arch/arm/dts/Makefile
++++ arch/arm/dts/Makefile
+@@ -263,6 +263,7 @@
+ 	zynq-zybo.dtb \
+ 	zynq-zybo-z7.dtb
+ dtb-$(CONFIG_ARCH_ZYNQMP) += \
++	genesyszu.dtb			\
+ 	avnet-ultra96-rev1.dtb			\
+ 	avnet-ultrazedev-cc-v1.0-ultrazedev-som-v1.0.dtb	\
+ 	zynqmp-a2197-revA.dtb			\
 
---- board/xilinx/common/board.c
-+++ board/xilinx/common/board.c
-@@ -14,7 +14,8 @@
- #include <fru.h>
- #include <i2c_eeprom.h>
- #include <net.h>
--
-+#include <spi.h>
-+#include <spi_flash.h>
- 
- int zynq_board_read_rom_ethaddr(unsigned char *ethaddr)
- {
+--- .config
++++ .config
+@@ -188,7 +188,7 @@
+ CONFIG_ENV_SECT_SIZE=0x40000
+ CONFIG_DM_GPIO=y
+ CONFIG_SPL_DM_SPI=y
+-CONFIG_DEFAULT_DEVICE_TREE="zynqmp-zcu100-revC"
++CONFIG_DEFAULT_DEVICE_TREE="genesyszu"
+ CONFIG_SPL_TEXT_BASE=0xfffc0000
+ CONFIG_SPL_MMC=y
+ CONFIG_SPL_SERIAL=y
+@@ -506,7 +506,6 @@
+ # CONFIG_SPL_REMOTEPROC is not set
+ # CONFIG_SPL_RTC is not set
+ # CONFIG_SPL_SATA is not set
+-CONFIG_SPL_SPI_FLASH_TINY=y
+ # CONFIG_SPL_SPI_FLASH_MTD is not set
+ CONFIG_SPL_SPI_LOAD=y
+ CONFIG_SYS_SPI_U_BOOT_OFFS=0x100000
+@@ -676,6 +675,7 @@
+ # CONFIG_CMD_OSD is not set
+ CONFIG_CMD_PART=y
+ # CONFIG_CMD_PCI is not set
++CONFIG_CMD_PINMUX=y
+ CONFIG_CMD_POWEROFF=y
+ # CONFIG_CMD_READ is not set
+ # CONFIG_CMD_SATA is not set
+@@ -854,7 +854,7 @@
+ CONFIG_OF_SEPARATE=y
+ # CONFIG_OF_EMBED is not set
+ # CONFIG_OF_BOARD is not set
+-CONFIG_OF_LIST="avnet-ultra96-rev1 zynqmp-a2197-revA zynqmp-e-a2197-00-revA zynqmp-g-a2197-00-revA zynqmp-m-a2197-01-revA zynqmp-m-a2197-02-revA zynqmp-m-a2197-03-revA zynqmp-p-a2197-00-revA zynqmp-zc1232-revA zynqmp-zc1254-revA zynqmp-zc1751-xm015-dc1 zynqmp-zc1751-xm016-dc2 zynqmp-zc1751-xm017-dc3 zynqmp-zc1751-xm018-dc4 zynqmp-zc1751-xm019-dc5 zynqmp-zcu100-revC zynqmp-zcu102-rev1.1 zynqmp-zcu102-rev1.0 zynqmp-zcu102-revA zynqmp-zcu102-revB zynqmp-zcu104-revA zynqmp-zcu104-revC zynqmp-zcu106-revA zynqmp-zcu111-revA zynqmp-zcu1275-revA zynqmp-zcu1275-revB zynqmp-zcu1285-revA zynqmp-zcu208-revA zynqmp-zcu216-revA zynqmp-topic-miamimp-xilinx-xdp-v1r1 zynqmp-sm-k26-revA zynqmp-smk-k26-revA zynqmp-zcu670-revA zynqmp-zcu670-revB"
++CONFIG_OF_LIST="genesyszu"
+ # CONFIG_MULTI_DTB_FIT is not set
+ # CONFIG_SPL_MULTI_DTB_FIT is not set
+ CONFIG_OF_SPL_REMOVE_PROPS="pinctrl-0 pinctrl-names interrupt-parent interrupts iommus power-domains"
+@@ -1337,7 +1337,6 @@
+ CONFIG_SF_DEFAULT_CS=0
+ CONFIG_SF_DEFAULT_MODE=0
+ CONFIG_SF_DEFAULT_SPEED=1000000
+-# CONFIG_SPI_FLASH_SFDP_SUPPORT is not set
+ CONFIG_SPI_FLASH_SMART_HWCAPS=y
+ # CONFIG_SPI_FLASH_SOFT_RESET is not set
+ CONFIG_SPI_FLASH_BAR=y
+@@ -1405,7 +1404,7 @@
+ CONFIG_PHY_TI_DP83867=y
+ # CONFIG_PHY_TI_GENERIC is not set
+ CONFIG_PHY_VITESSE=y
+-# CONFIG_PHY_XILINX is not set
++CONFIG_PHY_XILINX=y
+ CONFIG_PHY_XILINX_GMII2RGMII=y
+ CONFIG_PHY_ETHERNET_ID=y
+ CONFIG_PHY_FIXED=y
+@@ -1481,8 +1480,29 @@
+ #
+ # Pin controllers
+ #
+-# CONFIG_PINCTRL is not set
+-# CONFIG_SPL_PINCTRL is not set
++CONFIG_PINCTRL=y
++CONFIG_PINCTRL_FULL=y
++CONFIG_PINCTRL_GENERIC=y
++CONFIG_PINMUX=y
++CONFIG_PINCONF=y
++CONFIG_PINCONF_RECURSIVE=y
++CONFIG_SPL_PINCTRL=y
++CONFIG_SPL_PINCTRL_FULL=y
++CONFIG_SPL_PINCTRL_GENERIC=y
++CONFIG_SPL_PINMUX=y
++# CONFIG_SPL_PINCONF is not set
++CONFIG_SPL_PINCONF_RECURSIVE=y
++# CONFIG_PINCTRL_AT91 is not set
++# CONFIG_PINCTRL_AT91PIO4 is not set
++# CONFIG_PINCTRL_INTEL is not set
++# CONFIG_PINCTRL_QE is not set
++# CONFIG_PINCTRL_ROCKCHIP_RV1108 is not set
++# CONFIG_PINCTRL_SINGLE is not set
++# CONFIG_PINCTRL_STM32 is not set
++# CONFIG_PINCTRL_STMFX is not set
++# CONFIG_SPL_PINCTRL_STMFX is not set
++# CONFIG_PINCTRL_K210 is not set
++CONFIG_PINCTRL_ZYNQMP=y
+ CONFIG_POWER=y
+ # CONFIG_POWER_LEGACY is not set
+ # CONFIG_SPL_POWER_LEGACY is not set
 
---- arch/arm/cpu/armv8/start.S
-+++ arch/arm/cpu/armv8/start.S
-@@ -67,8 +67,10 @@
- 	adr	x0, _start		/* x0 <- Runtime value of _start */
- 	ldr	x1, _TEXT_BASE		/* x1 <- Linked value of _start */
- 	sub	x9, x0, x1		/* x9 <- Run-vs-link offset */
--	adr	x2, __rel_dyn_start	/* x2 <- Runtime &__rel_dyn_start */
--	adr	x3, __rel_dyn_end	/* x3 <- Runtime &__rel_dyn_end */
-+	adrp    x2, __rel_dyn_start     /* x2 <- Runtime &__rel_dyn_start */
-+	add     x2, x2, #:lo12:__rel_dyn_start
-+	adrp    x3, __rel_dyn_end       /* x3 <- Runtime &__rel_dyn_end */
-+	add     x3, x3, #:lo12:__rel_dyn_end
- pie_fix_loop:
- 	ldp	x0, x1, [x2], #16	/* (x0, x1) <- (Link location, fixup) */
- 	ldr	x4, [x2], #8		/* x4 <- addend */
---- arch/arm/lib/crt0_64.S
-+++ arch/arm/lib/crt0_64.S
-@@ -73,7 +73,7 @@
- #elif defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
- 	ldr	x0, =(CONFIG_SPL_STACK)
- #elif defined(CONFIG_INIT_SP_RELATIVE)
--	adr	x0, __bss_start
-+	adrp	x0, __bss_start
- 	add	x0, x0, #CONFIG_SYS_INIT_SP_BSS_OFFSET
- #else
- 	ldr	x0, =(CONFIG_SYS_INIT_SP_ADDR)
-	
---- board/xilinx/zynqmp/zynqmp.c
-+++ board/xilinx/zynqmp/zynqmp.c
-@@ -516,6 +516,7 @@
- 
- int board_late_init(void)
- {
-+	printf("Start board late init");
- 	u8 bootmode;
- 	struct udevice *dev;
- 	int bootseq = -1;
-@@ -538,11 +539,13 @@
- 
- 	if (!CONFIG_IS_ENABLED(ENV_VARS_UBOOT_RUNTIME_CONFIG))
- 		return 0;
--
-+		
-+	printf("Before setting fdtfile in zynqmp.c \n");
-+	
- 	ret = set_fdtfile();
- 	if (ret)
- 		return ret;
--
-+	printf("Before getting bootmode \n");
- 	bootmode = zynqmp_get_bootmode();
- 
- 	puts("Bootmode: ");

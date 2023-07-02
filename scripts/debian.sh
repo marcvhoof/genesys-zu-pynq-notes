@@ -1,54 +1,53 @@
-LINUX_TAG=xlnx_rebase_v5.4_ubuntu_20.04_p1
 device=$1
 
 boot_dir=`mktemp -d /tmp/BOOT.XXXXXXXXXX`
 root_dir=`mktemp -d /tmp/ROOT.XXXXXXXXXX`
 
-linux_dir=tmp/linux-$LINUX_TAG
-linux_ver=5.4.0
+linux_dir=tmp/linux-xlnx_rebase_v5.15_LTS_2022.1
+linux_ver=5.15
 
-# Choose mirror automatically, depending the geographic and network location
+ubuntuxilinx=http://ppa.launchpad.net/ubuntu-xilinx/updates/ubuntu
+ubuntudistro=jammy
+
+# Choose mirror automatically, depending the geographic and network location (http://deb.debian.org/debian)
 mirror=http://deb.debian.org/debian
 
-distro=stretch
+distro=bullseye
 arch=arm64
 
 passwd=changeme
 timezone=Europe/Brussels
 
 # Create partitions
-
 parted -s $device mklabel msdos
-parted -s $device mkpart primary fat16 4MiB 32MiB
-parted -s $device mkpart primary ext4 32MiB 100%
+parted -s $device mkpart primary fat16 4MiB 64MiB
+parted -s $device mkpart primary ext4 64MiB 100%
 
 boot_dev=/dev/`lsblk -ln -o NAME -x NAME $device | sed '2!d'`
 root_dev=/dev/`lsblk -ln -o NAME -x NAME $device | sed '3!d'`
 
 # Create file systems
-
 mkfs.vfat -v $boot_dev
 mkfs.ext4 -F -j $root_dev
 
 # Mount file systems
-
 mount $boot_dev $boot_dir
 mount $root_dev $root_dir
 
 # Copy files to the boot file system
-
 cp boot.bin devicetree.dtb Image $boot_dir
 cp cfg/uEnv-ext4.txt $boot_dir/uEnv.txt
 
 # Install Debian base system to the root file system
-
 debootstrap --foreign --arch $arch $distro $root_dir $mirror
 
 # Install Linux modules
-
 modules_dir=$root_dir/lib/modules/$linux_ver
 
 mkdir -p $modules_dir/kernel
+mkdir -p $root_dir/lib/firmware/
+mkdir -p $root_dir/lib/firmware/mchp
+cp patches/wilcfirmware/wilc*.bin $root_dir/lib/firmware/mchp
 
 find $linux_dir -name \*.ko -printf '%P\0' | tar --directory=$linux_dir --owner=0 --group=0 --null --files-from=- -zcf - | tar -zxf - --directory=$modules_dir/kernel
 
@@ -57,7 +56,6 @@ cp $linux_dir/modules.order $linux_dir/modules.builtin $modules_dir/
 depmod -a -b $root_dir $linux_ver
 
 # Add missing configuration files and packages
-
 cp /etc/resolv.conf $root_dir/etc/
 cp /usr/bin/qemu-arm-static $root_dir/usr/bin/
 
@@ -71,11 +69,12 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 cat <<- EOF_CAT > /etc/apt/sources.list
 deb $mirror $distro main contrib non-free
+deb $ubuntuxilinx $ubuntudistro main
 deb-src $mirror $distro main contrib non-free
 deb $mirror $distro-updates main contrib non-free
 deb-src $mirror $distro-updates main contrib non-free
-deb http://security.debian.org/debian-security $distro/updates main contrib non-free
-deb-src http://security.debian.org/debian-security $distro/updates main contrib non-free
+deb http://security.debian.org/debian-security $distro-security main contrib non-free
+deb-src http://security.debian.org/debian-security $distro-security main contrib non-free
 EOF_CAT
 
 cat <<- EOF_CAT > etc/apt/apt.conf.d/99norecommends
@@ -90,7 +89,7 @@ cat <<- EOF_CAT > etc/fstab
 /dev/mmcblk0p1  /boot           vfat    defaults            0       2
 EOF_CAT
 
-echo genesys-zu > etc/hostname
+echo genesyszu > etc/hostname
 
 apt-get update
 apt-get -y upgrade
@@ -103,17 +102,21 @@ update-locale LANG=en_US.UTF-8
 
 ln -sf /usr/share/zoneinfo/$timezone etc/localtime
 dpkg-reconfigure --frontend=noninteractive tzdata
+apt-get update
 
-apt-get -y install openssh-server ca-certificates ntp ntpdate fake-hwclock \
-  usbutils psmisc lsof parted curl vim wpasupplicant hostapd isc-dhcp-server \
-  iw firmware-realtek firmware-ralink firmware-atheros firmware-brcm80211 \
-  ifplugd ntfs-3g net-tools less build-essential
+apt-get -y upgrade
+
+apt-get -y install openssh-server ca-certificates ntp ntpdate fake-hwclock git wget ca-certificates \
+  usbutils psmisc lsof parted curl vim wpasupplicant hostapd isc-dhcp-server pv lshw mmc-utils \
+  firmware-misc-nonfree firmware-realtek firmware-ralink firmware-atheros firmware-brcm80211 \
+  iw iptables ifplugd ntfs-3g net-tools less build-essential pciutils nvme-cli ethtool network-manager \
+  python3-cffi libssl-dev libcurl4-openssl-dev ifupdown
 
 sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' etc/ssh/sshd_config
 
 cat <<- EOF_CAT >> etc/securetty
 
-# Serial Console for Xilinx Zynq-MPSOC
+# Serial Console for Xilinx Zynq-MPSoC
 ttyPS0
 EOF_CAT
 
@@ -145,11 +148,13 @@ EOF_CAT
 
 cat <<- EOF_CAT > etc/hostapd/hostapd.conf
 interface=wlan0
-ssid=RedPitaya
+ssid=GenesysZU
+dtim_period=2
 driver=nl80211
+ctrl_interface=/var/run/hostapd
+ap_max_inactivity=300
 hw_mode=g
 channel=6
-macaddr_acl=0
 auth_algs=1
 ignore_broadcast_ssid=0
 wpa=2

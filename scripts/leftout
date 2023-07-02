@@ -1,0 +1,70 @@
+
+##$PYNQ_VENV
+PYNQ_VENV=/usr/local/share/pynq-venv
+./pre.sh
+./qemu.sh
+popd
+
+source /etc/profile.d/pynq_venv.sh
+
+# Installing PYNQ-Metadata
+python3 -m pip install pynqmetadata==0.1.2 
+
+# Install PYNQ-Utils
+python3 -m pip install pynqutils==0.1.1 
+
+# PYNQ JUPYTER
+pushd pynq/sdbuild/packages/jupyter
+./pre.sh
+./qemu.sh
+popd
+
+# PYNQ Allocator
+pushd pynq/sdbuild/packages/libsds
+./pre.sh
+./qemu.sh
+popd
+
+# Install PYNQ-3.0.1
+python3 -m pip install pynq==3.0.1
+
+## GCC-MB and XCLBINUTILS
+pushd /tmp
+
+popd
+
+# Compile pynq device tree overlay and insert it by default
+pushd dts/
+make
+mkdir -p /usr/local/share/pynq-venv/pynq-dts/
+cp insert_dtbo.py pynq.dtbo /usr/local/share/pynq-venv/pynq-dts/
+echo "python3 /usr/local/share/pynq-venv/pynq-dts/insert_dtbo.py" >> /etc/profile.d/pynq_venv.sh
+
+source /etc/profile.d/pynq_venv.sh
+popd
+
+echo "Genesys ZU notebooks"
+#Install PYNQ-HelloWorld
+python3 -m pip install pynq_helloworld --no-build-isolation 
+
+# Install DPU-PYNQ
+yes Y | apt remove --purge vitis-ai-runtime
+python3 -m pip install pynq-dpu==2.5 --no-build-isolation
+
+# Deliver all notebooks
+yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f
+
+# Copy additional notebooks from pynq
+cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
+
+# Change notebooks folder ownership and permissions
+chown $LOGNAME:$LOGNAME -R $PYNQ_JUPYTER_NOTEBOOKS
+chmod ugo+rw -R $PYNQ_JUPYTER_NOTEBOOKS
+
+# Start Jupyter services 
+systemctl start jupyter.service
+
+# Start the service for clearing the statefile on boot
+cp pynq/sdbuild/packages/clear_pl_statefile/clear_pl_statefile.sh /usr/local/bin
+cp pynq/sdbuild/packages/clear_pl_statefile/clear_pl_statefile.service /lib/systemd/system
+systemctl enable clear_pl_statefile

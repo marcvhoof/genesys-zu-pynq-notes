@@ -27,6 +27,8 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
   sudo ufw allow 3389/tcp
   sudo apt-get install ubuntu-desktop -y
   adduser xilinx
+  ```
+  ```
   usermod -aG sudo xilinx
   swapoff -a
   fallocate -l 16G /swapfile
@@ -35,7 +37,7 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
   swapon /swapfile
   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  apt-get install -y ./google*
+  sudo apt-get install -y ./google*
   reboot
   ```
   ### Find your IP and connect with your Remote Desktop Client

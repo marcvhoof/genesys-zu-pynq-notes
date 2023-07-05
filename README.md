@@ -16,7 +16,7 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
   <summary>Optional Cloud, Docker or Vagrant instructions - when starting from scratch</summary>
   
   ### Instructions for a Droplet on DigitalOcean
-  Select a Droplet with an additional volume (my settings Ubuntu 20.04 LTS / 160 GB / 8 GB ram / NVME SSD / + volume 200GB)
+  Select a Droplet with an additional volume (my settings Ubuntu 20.04 LTS / 160 GB / 8 GB ram / NVME SSD / + volume 200GB). DigitalOcean somehow blocks port 3389 sometimes - I changed it to 3388 afterwards to fix this problem. 
   
   ### For Cloud applications, create a remote desktop server
   ```

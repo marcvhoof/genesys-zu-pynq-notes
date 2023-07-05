@@ -112,6 +112,13 @@ Use your favourite image maker. For example Ubuntu's start up image maker. You c
 Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
 insmod /lib/modules/zocl.ko
+
+# Fix keyserver
+apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 \
+	        --verbose 803DDF595EA7B6644F9B96B752150A179A9E84C9
+echo "deb http://ppa.launchpad.net/ubuntu-xilinx/updates/ubuntu jammy main" > /etc/apt/sources.list.d/xilinx-gstreamer.list
+apt update 
+
 #Install PYNQ-HelloWorld
 python3 -m pip install pynq_helloworld --no-build-isolation 
 

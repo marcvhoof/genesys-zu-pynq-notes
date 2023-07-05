@@ -13,7 +13,7 @@ These commands should be the only ones you need to build your image. You do need
 As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported and will give you problems with installing XRT, which is necessary for building the DPU (see compatibility matrix below). If your machine is running a different version, I would consider using a Cloud or Vagrant install. However - if you plan to use CUDA or extensive training for your neural network in Vitis AI, probably a local setup (e.g. with Docker) is more efficient. 
 
 <details>
-  <summary>Optional Cloud or Vagrant instructions - when starting from scratch</summary>
+  <summary>Optional Cloud, Docker or Vagrant instructions - when starting from scratch</summary>
   
   ### Instructions for a Droplet on DigitalOcean
   Select a Droplet with an additional volume (my settings Ubuntu 20.04 LTS / 160 GB / 8 GB ram / NVME SSD / + volume 200GB)

@@ -260,11 +260,7 @@ apt-get --allow-unauthenticated -y upgrade
 
 apt-get --allow-unauthenticated -y install libdrm-xlnx-dev 
 
-#Install XRT - probably better to use the kria qemu script for xrt
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt-dev_202210.2.13.466+dfsg-6_arm64.deb
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt-utils_202210.2.13.466+dfsg-6_arm64.deb
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt1_202210.2.13.466+dfsg-6_arm64.deb
-
+#Install XRT - building in QEMU fails at this point
 cp -f -r usr/xrt/patches/bin/* usr/bin
 cp -n -r usr/xrt/patches/lib/* usr/lib
 

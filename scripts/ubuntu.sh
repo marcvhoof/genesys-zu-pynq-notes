@@ -416,6 +416,7 @@ sync
 EOF_CHROOT
 
 rm $root_dir/proc/stat
+rm $root_dir/proc/cpuinfo
 rm $root_dir/usr/bin/qemu-arm-static
 
 # Unmount file systems

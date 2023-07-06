@@ -251,6 +251,10 @@ apt-get --allow-unauthenticated -y upgrade
 
 apt-get --allow-unauthenticated -y install libdrm-xlnx-dev 
 
+<<<<<<< HEAD
+=======
+#Install XRT - building in QEMU fails at this point
+>>>>>>> be7a67d6c1de760cfd9f96d4af7dca996db16d1b
 cp -f -r usr/xrt/patches/bin/* usr/bin
 cp -n -r usr/xrt/patches/lib/* usr/lib
 

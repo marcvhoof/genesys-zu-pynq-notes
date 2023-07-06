@@ -143,7 +143,7 @@ In the genesys-zu-pynq-notes directory execute the following command.
 ```
 make DPU
 ```
-Install the DPU overlay on PYNQ and get the relevant notebooks and perform its functionality.
+Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working folder on the target device. Install the DPU overlay on PYNQ and get the relevant notebooks.
 ```
 cd $PYNQ_JUPYTER_NOTEBOOKS
 pynq get-notebooks pynq-dpu -p .
@@ -151,7 +151,24 @@ python3 -m pytest --pyargs pynq_dpu
 ```
 The [script patches/docker/docker_script.sh](https://github.com/marcvhoof/genesys-zu-pynq-notes/blob/main/patches/docker/docker_script.sh) can be used to instruct Vitis to compile your neural network and produce a .xmodel, without further interaction. This file can be found in the shared host/Docker directory (tmp/DPU-PYNQ/host/). However, for custom models, interactivity is probably necessary and changing the content of this file gives you a terminal inside the Vitis Docker.  
 
-Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working foLder on the target device.
+# 8. [optional] Rebuild the XRT library
+This cannot yet be build succesfully in a chroot. So on the target device execute the following. 
+```
+# build and install
+cd /root
+mkdir xrt-git
+git clone https://github.com/Xilinx/XRT xrt-git
+cd xrt-git
+git checkout -b temp tags/202210.2.13.466
+# An incorrect format specifier causes a crash on armhf
+sed -i 's:%ld bytes):%lld bytes):' src/runtime_src/tools/xclbinutil/XclBinClass.cxx
+cd build
+chmod 755 build.sh
+XRT_NATIVE_BUILD=no ./build.sh -dbg -noctest
+cd Debug
+make install
+```
+
 ## Current state
 * Ubuntu 22.04 LTS runs well and can connect using DHCP over Ethernet
 * A Samsung NVME SSD reaches around 300 MB/s read/write on the X1 port

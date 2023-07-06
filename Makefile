@@ -59,9 +59,9 @@ RTL8188_URL = https://github.com/lwfinger/rtl8188eu/archive/v5.2.2.4.tar.gz
 RTL8192_TAR = tmp/rtl8192cu-fixes-master.tar.gz
 RTL8192_URL = https://github.com/pvaret/rtl8192cu-fixes/archive/master.tar.gz
 
-.PRECIOUS: tmp/cores/% tmp/%.xpr tmp/%.xsa tmp/%.bit tmp/%.fsbl/executable.elf tmp/%.atf/bl31.elf tmp/%.pmu/pmu.elf tmp/%.tree/system-top.dts
+.PRECIOUS: tmp/cores/% tmp/%.xpr tmp/%.xsa tmp/%.zip tmp/%.bit tmp/%.fsbl/executable.elf tmp/%.atf/bl31.elf tmp/%.pmu/pmu.elf tmp/%.tree/system-top.dts
 
-all: tmp/$(NAME).bit boot.bin Image devicetree.dtb
+all: tmp/$(NAME).bit boot.bin Image devicetree.dtb $(NAME).zip
 
 cores: $(addprefix tmp/cores/, $(CORES))
 
@@ -197,6 +197,13 @@ tmp/%.tree/system-top.dts: tmp/%.xsa $(DTREE_DIR)
 	mkdir -p $(@D)
 	cp cfg/genesyszu.dtsi $(DTREE_DIR)/device_tree/data/kernel_dtsi/$(VITISV)/BOARD/genesyszu.dtsi
 	$(XSCT) scripts/devicetree.tcl $* $(PROC) $(DTREE_DIR)
+
+%.zip: tmp/%.xsa
+	mkdir -p $(@D)
+	cp tmp/$(NAME).gen/sources_1/bd/system/hw_handoff/system.hwh $(NAME).hwh
+	cp tmp/$(NAME).bit $(NAME).bit
+	zip -r $(NAME).zip $(NAME).bit $(NAME).hwh
+	rm $(NAME).hwh $(NAME).bit
 	
 tmp/dpu/%.xmodel: 
 	mkdir -p $(@D)

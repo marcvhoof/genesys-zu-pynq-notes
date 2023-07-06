@@ -111,7 +111,7 @@ Use your favourite image maker. For example Ubuntu's start up image maker. You c
 # 7. Finish installing PYNQ
 Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
-insmod /lib/modules/zocl.ko
+insmod /lib/modules/*/kernel/zocl.ko
 
 # Fix keyserver
 apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 \

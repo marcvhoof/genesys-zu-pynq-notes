@@ -111,6 +111,7 @@ Use your favourite image maker. For example Ubuntu's start up image maker. You c
 # 7. Finish installing PYNQ
 Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
+# Load XRT library module
 insmod /lib/modules/*/kernel/zocl.ko
 
 # Fix keyserver
@@ -125,6 +126,9 @@ python3 -m pip install pynq_helloworld --no-build-isolation
 # Install DPU-PYNQ
 yes Y | apt remove --purge vitis-ai-runtime
 python3 -m pip install pynq-dpu==2.5 --no-build-isolation
+
+# Install Pynq Peripherals
+python3 -m pip install git+https://github.com/Xilinx/PYNQ_Peripherals.git
 
 # Deliver all notebooks
 yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f

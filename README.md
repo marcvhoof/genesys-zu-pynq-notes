@@ -143,6 +143,12 @@ In the genesys-zu-pynq-notes directory execute the following command.
 ```
 make DPU
 ```
+Install the DPU overlay on PYNQ and get the relevant notebooks and perform its functionality.
+```
+cd $PYNQ_JUPYTER_NOTEBOOKS
+pynq get-notebooks pynq-dpu -p .
+python3 -m pytest --pyargs pynq_dpu
+```
 The [script patches/docker/docker_script.sh](https://github.com/marcvhoof/genesys-zu-pynq-notes/blob/main/patches/docker/docker_script.sh) can be used to instruct Vitis to compile your neural network and produce a .xmodel, without further interaction. This file can be found in the shared host/Docker directory (tmp/DPU-PYNQ/host/). However, for custom models, interactivity is probably necessary and changing the content of this file gives you a terminal inside the Vitis Docker.  
 
 Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working foLder on the target device.

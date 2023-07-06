@@ -65,6 +65,8 @@ mkdir -p $root_dir/lib/firmware/
 mkdir -p $root_dir/lib/firmware/mchp
 cp patches/wilcfirmware/wilc*.bin $root_dir/lib/firmware/mchp
 
+cp tmp/xrt*/zocl.ko $linux_dir/
+
 find $linux_dir -name \*.ko -printf '%P\0' | tar --directory=$linux_dir --owner=0 --group=0 --null --files-from=- -zcf - | tar -zxf - --directory=$modules_dir/kernel
 
 cp $linux_dir/modules.order $linux_dir/modules.builtin $modules_dir/
@@ -167,19 +169,6 @@ cat <<- EOF_CAT > /etc/hosts
 127.0.0.1 localhost
 EOF_CAT
 
-#mkdir -p etc/network/interfaces.d/
-#touch etc/network/interfaces.d/eth0
-#cat <<- EOF_CAT > etc/network/interfaces.d/eth0
-#iface eth0 inet dhcp
-#EOF_CAT
-
-#cat <<- EOF_CAT > etc/default/ifplugd
-#INTERFACES="eth0"
-#HOTPLUG_INTERFACES=""
-#ARGS="-q -f -u0 -d10 -w -I"
-#SUSPEND_ACTION="stop"
-#EOF_CAT
-
 mkdir -p etc/netplan/
 cat <<- EOF_CAT > etc/netplan/00-install-config.yaml
 network:
@@ -244,7 +233,7 @@ apt-get --allow-unauthenticated -y upgrade
 
 #PYNQ prerequistes
 apt-get --allow-unauthenticated -y install portaudio19-dev libcairo2-dev libopencv-dev python3-opencv graphviz i2c-tools \
-  fswebcam ffmpeg libsm6 libxext6 debhelper dh-python python3-all python3-setuptools python3-dev cmake \
+  fswebcam ffmpeg libsm6 libxext6 debhelper dh-python python3-all python3-setuptools python3-dev cmake kmod \
   python3-gnupg python3.10-venv devscripts lintian lsb-release python3-debian python3-pytest libboost-atomic-dev \
   libboost-serialization-dev libboost-system-dev libboost-test-dev libboost-thread-dev libboost-dev\
   libboost-thread-dev libboost-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-program-options-dev
@@ -255,15 +244,12 @@ apt-get --allow-unauthenticated update
 apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 \
 	        --verbose 803DDF595EA7B6644F9B96B752150A179A9E84C9
 echo "deb http://ppa.launchpad.net/ubuntu-xilinx/updates/ubuntu jammy main" > /etc/apt/sources.list.d/xilinx-gstreamer.list
+apt-get -o DPkg::Lock::Timeout=10 update
+
 apt-get --allow-unauthenticated update
 apt-get --allow-unauthenticated -y upgrade
 
 apt-get --allow-unauthenticated -y install libdrm-xlnx-dev 
-
-#Install XRT - probably better to use the kria qemu script for xrt
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt-dev_202210.2.13.466+dfsg-6_arm64.deb
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt-utils_202210.2.13.466+dfsg-6_arm64.deb
-#wget http://ports.ubuntu.com/pool/universe/x/xrt/libxrt1_202210.2.13.466+dfsg-6_arm64.deb
 
 cp -f -r usr/xrt/patches/bin/* usr/bin
 cp -n -r usr/xrt/patches/lib/* usr/lib
@@ -366,17 +352,6 @@ popd
 # Installing wheel
 pip3 install wheel
 
-#Install PYNQ-HelloWorld
-#python3 -m pip install pynq_helloworld --no-build-isolation 
-
-# Install DPU-PYNQ
-#yes Y | apt remove --purge vitis-ai-runtime
-#python3 -m pip install pynq-dpu==2.5 --no-build-isolation
-
-# Deliver all notebooks
-#yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f
-#cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
-
 # Patch microblaze to use virtualenv libraries
 sed -i "s/opt\/microblaze/usr\/local\/share\/pynq-venv\/bin/g" /usr/local/share/pynq-venv/lib/#python3.10/site-packages/pynq/lib/pynqmicroblaze/rpc.py
 
@@ -420,6 +395,7 @@ sync
 EOF_CHROOT
 
 rm $root_dir/proc/stat
+rm $root_dir/proc/cpuinfo
 rm $root_dir/usr/bin/qemu-arm-static
 
 # Unmount file systems

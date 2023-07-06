@@ -13,10 +13,10 @@ These commands should be the only ones you need to build your image. You do need
 As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported and will give you problems with installing XRT, which is necessary for building the DPU (see compatibility matrix below). If your machine is running a different version, I would consider using a Cloud or Vagrant install. However - if you plan to use CUDA or extensive training for your neural network in Vitis AI, probably a local setup (e.g. with Docker) is more efficient. 
 
 <details>
-  <summary>Optional Cloud or Vagrant instructions - when starting from scratch</summary>
+  <summary>Optional Cloud, Docker or Vagrant instructions - when starting from scratch</summary>
   
   ### Instructions for a Droplet on DigitalOcean
-  Select a Droplet with an additional volume (my settings Ubuntu 20.04 LTS / 160 GB / 8 GB ram / NVME SSD / + volume 200GB)
+  Select a Droplet with an additional volume (my settings Ubuntu 20.04 LTS / 160 GB / 8 GB ram / NVME SSD / + volume 200GB). DigitalOcean somehow blocks port 3389 sometimes - I changed it to 3388 afterwards to fix this problem. 
   
   ### For Cloud applications, create a remote desktop server
   ```
@@ -27,6 +27,8 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
   sudo ufw allow 3389/tcp
   sudo apt-get install ubuntu-desktop -y
   adduser xilinx
+  ```
+  ```
   usermod -aG sudo xilinx
   swapoff -a
   fallocate -l 16G /swapfile
@@ -35,7 +37,7 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
   swapon /swapfile
   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  apt-get install -y ./google*
+  sudo apt-get install -y ./google*
   reboot
   ```
   ### Find your IP and connect with your Remote Desktop Client
@@ -106,9 +108,18 @@ sudo sh scripts/image.sh scripts/ubuntu.sh genesys-zu-ubuntu-pynq-arm64.img 8096
 ```
 # 6. Burn to a fast SD Card
 Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 or use gparted afterwards to extend the filesystem to the size of your card. The Genesys ZU supports the UHS-I 104MB/s mode. 
-# 7. Finish installing PYNQ
+# 7. Finish installing PYNQ on target
 Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
+# Load XRT library module
+insmod /lib/modules/*/kernel/zocl.ko
+
+# Fix keyserver
+apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 \
+	        --verbose 803DDF595EA7B6644F9B96B752150A179A9E84C9
+echo "deb http://ppa.launchpad.net/ubuntu-xilinx/updates/ubuntu jammy main" > /etc/apt/sources.list.d/xilinx-gstreamer.list
+apt update 
+
 #Install PYNQ-HelloWorld
 python3 -m pip install pynq_helloworld --no-build-isolation 
 
@@ -116,19 +127,64 @@ python3 -m pip install pynq_helloworld --no-build-isolation
 yes Y | apt remove --purge vitis-ai-runtime
 python3 -m pip install pynq-dpu==2.5 --no-build-isolation
 
+# Install Pynq Peripherals
+python3 -m pip install git+https://github.com/Xilinx/PYNQ_Peripherals.git
+
 # Deliver all notebooks
 yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f
 cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
 ```
-Connect to the Jupyter, finish the installation and start creating your project.
+Connect to the Jupyter (IPGENESYSZU:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
+```
+ifconfig
+```
 # 8. [optional] Create the DPU Overlay and start working with Vitis-AI 2.5
 In the genesys-zu-pynq-notes directory execute the following command. 
 ```
 make DPU
 ```
+Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working folder on the target device. Install the DPU overlay on PYNQ and get the relevant notebooks.
+```
+cd $PYNQ_JUPYTER_NOTEBOOKS
+pynq get-notebooks pynq-dpu -p .
+python3 -m pytest --pyargs pynq_dpu
+```
 The [script patches/docker/docker_script.sh](https://github.com/marcvhoof/genesys-zu-pynq-notes/blob/main/patches/docker/docker_script.sh) can be used to instruct Vitis to compile your neural network and produce a .xmodel, without further interaction. This file can be found in the shared host/Docker directory (tmp/DPU-PYNQ/host/). However, for custom models, interactivity is probably necessary and changing the content of this file gives you a terminal inside the Vitis Docker.  
 
-Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working foLder on the target device.
+# 9. [optional] Rebuild the XRT library
+This cannot yet be build succesfully in a chroot. So on the target device execute the following. 
+```
+# build and install
+cd /root
+mkdir xrt-git
+git clone https://github.com/Xilinx/XRT xrt-git
+cd xrt-git
+git checkout -b temp tags/202210.2.13.466
+# An incorrect format specifier causes a crash on armhf
+sed -i 's:%ld bytes):%lld bytes):' src/runtime_src/tools/xclbinutil/XclBinClass.cxx
+cd build
+chmod 755 build.sh
+XRT_NATIVE_BUILD=no ./build.sh -dbg -noctest
+cd Debug
+make install
+```
+```
+# Build and install xclbinutil
+cd ../../
+mkdir xclbinutil_build
+sed -i 's/xdp_hw_emu_device_offload_plugin xdp_core xrt_coreutil xrt_hwemu/xdp_core xrt_coreutil/g' ./src/runtime_src/xdp/CMakeLists.txt
+cd xclbinutil_build/
+cmake ../src/
+make install -C runtime_src/tools/xclbinutil
+mv /opt/xilinx/xrt/bin/unwrapped/xclbinutil /usr/local/bin/xclbinutil
+rm -rf /opt/xilinx/xrt
+
+# cleanup
+cd /root
+rm -rf xrt-git
+```
+
+# Relevant background & progress
 ## Current state
 * Ubuntu 22.04 LTS runs well and can connect using DHCP over Ethernet
 * A Samsung NVME SSD reaches around 300 MB/s read/write on the X1 port
@@ -181,4 +237,5 @@ And the Xilinx DPU, (Kria-)Pynq github
 * https://github.com/Xilinx/PYNQ
 * https://github.com/Xilinx/DPU-PYNQ
 * https://github.com/Xilinx/Kria-PYNQ
+
 

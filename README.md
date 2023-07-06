@@ -108,7 +108,7 @@ sudo sh scripts/image.sh scripts/ubuntu.sh genesys-zu-ubuntu-pynq-arm64.img 8096
 ```
 # 6. Burn to a fast SD Card
 Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 or use gparted afterwards to extend the filesystem to the size of your card. The Genesys ZU supports the UHS-I 104MB/s mode. 
-# 7. Finish installing PYNQ
+# 7. Finish installing PYNQ on target
 Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
 # Load XRT library module

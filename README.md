@@ -143,7 +143,7 @@ In the genesys-zu-pynq-notes directory execute the following command.
 ```
 make DPU
 ```
-Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel, zocl.ko) to your DPU working folder on the target device. Install the DPU overlay on PYNQ and get the relevant notebooks.
+Afterwards, copy the relevant files (.hwh, .bit, .tcl, .xmodel) to your DPU folder on the target device (/usr/local/share/pynq-venv/lib/python3.10/site-packages/pynq_dpu/). Install the DPU overlay on PYNQ and get the relevant notebooks.
 ```
 cd $PYNQ_JUPYTER_NOTEBOOKS
 pynq get-notebooks pynq-dpu -p .

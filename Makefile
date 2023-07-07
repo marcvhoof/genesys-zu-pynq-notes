@@ -221,7 +221,7 @@ tmp/dpu/%.xmodel:
 	cp $(@D)/DPU-PYNQ/host/./tf2_resnet50.xmodel $(@D)/$(NAME).xmodel
 
 clean:
-	$(RM) Image boot.bin devicetree.dtb tmp fsbl.elf devicetree.dtb system.bit pmu.elf u-boot.elf bl31.elf zocl.ko
+	$(RM) Image boot.bin devicetree.dtb tmp fsbl.elf devicetree.dtb system.bit pmu.elf u-boot.elf bl31.elf *.zip *.tar.gz
 	$(RM) .Xil usage_statistics_webtalk.html usage_statistics_webtalk.xml
 	$(RM) vivado*.jou vivado*.log
 	$(RM) webtalk*.jou webtalk*.log

@@ -100,7 +100,7 @@ cd genesys-zu-pynq-notes
 ```
 # 4. Build your project
 ```
-make NAME=led_blinker all
+make NAME=base all
 ```
 # 5. Create a Linux image containing everything, including Pynq 3.0.
 ```

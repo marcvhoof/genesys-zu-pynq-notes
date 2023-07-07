@@ -135,7 +135,7 @@ python3 -m pip install git+https://github.com/Xilinx/PYNQ_Peripherals.git
 yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f
 cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
 ```
-Connect to the Jupyter (IPGENESYSZU:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
+Connect to the Jupyter ([replace with IP]:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
 ```
 ifconfig
 ```

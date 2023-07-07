@@ -105,7 +105,7 @@ make NAME=base all
 ```
 # 5. Create a Linux image containing everything, including Pynq 3.0.
 ```
-sudo sh scripts/image.sh scripts/ubuntu.sh genesys-zu-ubuntu-pynq-arm64.img 8096
+sudo sh scripts/image.sh scripts/ubuntu_pynq.sh genesys-zu-ubuntu-pynq-arm64.img 8096
 ```
 # 6. Burn to a fast SD Card
 Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 or use gparted afterwards to extend the filesystem to the size of your card. The Genesys ZU supports the UHS-I 104MB/s mode. 

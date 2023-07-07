@@ -18,6 +18,7 @@ timezone=Europe/Brussels
 
 ARCH=aarch64
 HOME=/root
+project=base
 PYNQ_JUPYTER_NOTEBOOKS=/home/$LOGNAME/jupyter_notebooks
 BOARD=genesyszu
 PYNQ_VENV=/usr/local/share/pynq-venv
@@ -70,6 +71,10 @@ cp tmp/xrt*/zocl.ko $linux_dir/
 find $linux_dir -name \*.ko -printf '%P\0' | tar --directory=$linux_dir --owner=0 --group=0 --null --files-from=- -zcf - | tar -zxf - --directory=$modules_dir/kernel
 
 cp $linux_dir/modules.order $linux_dir/modules.builtin $modules_dir/
+
+mkdir -p $root_dir/usr/pynqfiles
+cp -r projects/$project $root_dir/usr/pynqfiles/
+cp $project.zip $root_dir/usr/pynqfiles/$project/
 
 depmod -a -b $root_dir $linux_ver
 
@@ -251,10 +256,6 @@ apt-get --allow-unauthenticated -y upgrade
 
 apt-get --allow-unauthenticated -y install libdrm-xlnx-dev 
 
-<<<<<<< HEAD
-=======
-#Install XRT - building in QEMU fails at this point
->>>>>>> be7a67d6c1de760cfd9f96d4af7dca996db16d1b
 cp -f -r usr/xrt/patches/bin/* usr/bin
 cp -n -r usr/xrt/patches/lib/* usr/lib
 
@@ -358,6 +359,9 @@ pip3 install wheel
 
 # Patch microblaze to use virtualenv libraries
 sed -i "s/opt\/microblaze/usr\/local\/share\/pynq-venv\/bin/g" /usr/local/share/pynq-venv/lib/#python3.10/site-packages/pynq/lib/pynqmicroblaze/rpc.py
+
+#Install base overlay
+python3 -m pip install /usr/pynqfiles/$project/
 
 # Start Jupyter services 
 systemctl enable jupyter.service

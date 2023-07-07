@@ -70,6 +70,7 @@ sudo apt-get--no-install-recommends install \
 ```
 sudo ln -s make /usr/bin/gmake
 ```
+Install Docker if you haven't already:
 ```
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg

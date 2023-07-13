@@ -1,4 +1,5 @@
-##No ports matched 'led_o[1]'2-3/ / aud_scl_io/ aud_sda_io
+### create clk
+create_bd_port -dir I clk_i
 
 ### LED
 create_bd_port -dir O -from 3 -to 0 led_o

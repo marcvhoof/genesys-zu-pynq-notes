@@ -1,7 +1,7 @@
 #Pavel's setup
 # clock input, connected to sysclk
-#set_property IOSTANDARD LVCMOS18 [get_ports clk_i]
-#set_property PACKAGE_PIN E12 [get_ports clk_i]
+set_property IOSTANDARD LVCMOS18 [get_ports clk_i]
+set_property PACKAGE_PIN E12 [get_ports clk_i]
 
 ### LED
 set_property IOSTANDARD LVCMOS33 [get_ports {led_o[*]}]

@@ -197,6 +197,7 @@ tmp/%.tree/system-top.dts: tmp/%.xsa $(DTREE_DIR)
 	mkdir -p $(@D)
 	cp cfg/genesyszu.dtsi $(DTREE_DIR)/device_tree/data/kernel_dtsi/$(VITISV)/BOARD/genesyszu.dtsi
 	$(XSCT) scripts/devicetree.tcl $* $(PROC) $(DTREE_DIR)
+	patch -p0 -N --forward -d $(@D) -p 0 < patches/devicetree.patch
 
 %.zip: tmp/%.xsa
 	mkdir -p $(@D)

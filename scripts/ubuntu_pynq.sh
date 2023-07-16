@@ -171,7 +171,13 @@ sed 's/tty1/ttyPS0/g; s/115200/115200/' etc/init/tty1.conf > etc/init/ttyPS0.con
 
 cat <<- EOF_CAT > /etc/hosts
 127.0.0.1 genesyszu
+127.0.0.1 gzupynq
+127.0.0.1 pynq
 127.0.0.1 localhost
+EOF_CAT
+
+cat <<- EOF_CAT > /etc/hostname
+gzupynq
 EOF_CAT
 
 mkdir -p etc/netplan/
@@ -240,7 +246,7 @@ apt-get --allow-unauthenticated -y upgrade
 apt-get --allow-unauthenticated -y install portaudio19-dev libcairo2-dev libopencv-dev python3-opencv graphviz i2c-tools \
   fswebcam ffmpeg libsm6 libxext6 debhelper dh-python python3-all python3-setuptools python3-dev cmake kmod \
   python3-gnupg python3.10-venv devscripts lintian lsb-release python3-debian python3-pytest libboost-atomic-dev \
-  libboost-serialization-dev libboost-system-dev libboost-test-dev libboost-thread-dev libboost-dev\
+  libboost-serialization-dev libboost-system-dev libboost-test-dev libboost-thread-dev libboost-dev avahi-daemon \
   libboost-thread-dev libboost-dev libboost-chrono-dev libboost-date-time-dev libboost-filesystem-dev libboost-program-options-dev
 
 apt-get --allow-unauthenticated update

@@ -25,6 +25,7 @@
 };
 
 &sdhci1 {
+	no-1-8-v;
 	disable-wp;
 	xlnx,itap-delay-sd-hsd = <0x29>;
 	xlnx,itap-delay-sd-ddr50 = <0x32>;

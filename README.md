@@ -108,9 +108,9 @@ make NAME=base all
 sudo sh scripts/image.sh scripts/ubuntu_pynq.sh genesys-zu-ubuntu-pynq-arm64.img 8096
 ```
 # 6. Burn to a fast SD Card
-Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 or use gparted afterwards to extend the filesystem to the size of your card. The Genesys ZU supports the UHS-I 104MB/s mode. 
+Use your favourite image maker. For example Ubuntu's start up image maker. You can change the image size in step 5 or use gparted afterwards to extend the filesystem to the size of your card. The Genesys ZU supports the UHS-I 104MB/s mode. I had problems in the past with different types of SD card not being recognised after u-boot, with the latest patches I seem to have less issues so far. 
 # 7. Finish installing PYNQ on target
-Login via Putty on the USB-UART, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
+Login via Putty on the USB-UART (/dev/ttyUSB1, 115200) or using ssh gzupynq.local, the standard password for root is changeme. The current setup only supports an Ethernet connection - which is autoconfigured with DHCP.
 ```
 # Load XRT library module
 insmod /lib/modules/*/kernel/zocl.ko
@@ -135,10 +135,8 @@ python3 -m pip install git+https://github.com/Xilinx/PYNQ_Peripherals.git
 yes Y | pynq-get-notebooks -p $PYNQ_JUPYTER_NOTEBOOKS -f
 cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
 ```
-Connect to the Jupyter ([replace with IP]:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
-```
-ifconfig
-```
+Connect to the Jupyter (gzupynq.local:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
+
 # 8. [optional] Create the DPU Overlay and start working with Vitis-AI 2.5
 In the genesys-zu-pynq-notes directory execute the following command. 
 ```
@@ -193,10 +191,6 @@ rm -rf xrt-git
 * The SYZYGY ADC/DAC can be used either over the native ZMOD port (only 1 available) or over the FMC-2-ZMOD adapter
 
 ## Current progress and known problems
-This repository has not yet been synced! Final files are expected before 2.7.2023
-
-error: /usr/lib/libxrt_core.so: cannot open shared object file: No such file or directory / ln waarschijnlijk niet mee gedownload om XRT te builden moet /usr/bin/grep: /proc/cpuinfo: No such file or directory
-
 * The WIFI - WILC1500 is recognised but fails to start the firmware and is not yet useable. I suspect it is a problem with the WILC1500 on-flash firmware or GPIO.
 * The audio chip is not yet included.
 * Only a selection of Pynq libraries is included (and/or tested)
@@ -210,7 +204,6 @@ error: /usr/lib/libxrt_core.so: cannot open shared object file: No such file or 
 Here is an overview to get you started. This is not an exhaustive list, it mentions the changes you probably at least need to make because these are Genesys ZU 3EG specific. Probably only minor changes have to be made in these files to use these files for the Genesys ZU 5EV.
 
 ### Board and FPGA Part files (/cfg dir):
-* genesyszu.dts
 * genesyszu.dtsi
 * ports.tcl
 * ports.xdc

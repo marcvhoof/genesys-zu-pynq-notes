@@ -397,6 +397,8 @@ nameserver 8.8.8.8
 nameserver 4.2.2.4
 EOF_CAT
 
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+
 systemctl daemon-reload
 systemctl enable netfix.service
 

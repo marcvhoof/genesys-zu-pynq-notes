@@ -1,0 +1,12 @@
+--- system-top.dts
++++ system-top.dts
+@@ -13,7 +13,7 @@
+ #include "genesyszu.dtsi"
+ / {
+ 	chosen {
+-		bootargs = "console=ttyPS0,115200 earlyprintk earlycon";
++		bootargs = "console=ttyPS0,115200 earlyprintk earlycon clk_ignore_unused";
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 	aliases {
+

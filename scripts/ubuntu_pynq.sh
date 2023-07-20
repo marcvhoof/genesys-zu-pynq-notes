@@ -20,7 +20,7 @@ ARCH=aarch64
 HOME=/root
 project=base
 PYNQ_JUPYTER_NOTEBOOKS=/home/$LOGNAME/jupyter_notebooks
-BOARD=genesyszu
+BOARD=gzu_3eg
 PYNQ_VENV=/usr/local/share/pynq-venv
 
 # Create partitions
@@ -341,6 +341,9 @@ popd
 
 # Install PYNQ-3.0.1
 python3 -m pip install pynq==3.0.1
+
+# Install additional libraries
+python3 -m pip install pandas
 
 ## GCC-MB and XCLBINUTILS
 pushd /tmp

@@ -7,7 +7,26 @@
 
 / {
 	model = "Genesys ZU 3EG - Pynq";
-
+	
+	//PCIe and USB 3.0
+	PS_MGTREFCLK0: clk100 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <100000000>;
+	};
+	//SATA
+	PS_MGTREFCLK1: clk150 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <150000000>;
+	};
+	//DisplayPort
+	PS_MGTREFCLK2: clk108 {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <108000000>;
+	};
+	
 	reserved-memory {
 		#address-cells = <2>;
 		#size-cells = <2>;
@@ -153,7 +172,7 @@ devicetree/bindings/mux/mux-controller.txt
 		reg = <1>; /*SS[1]*/
 		spi-max-frequency = <10000000>;
 	};
-/*	wilc_spi@0 {
+	wilc_spi@0 {
 		compatible = "microchip,wilc1000", "microchip,wilc3000";
 		spi-max-frequency = <48000000>;
 		reg = <0>;
@@ -161,9 +180,14 @@ devicetree/bindings/mux/mux-controller.txt
 		reset-gpios = <&gpioexp 2 0>;
 		chip_en-gpios = <&gpioexp 0 0>;
 		status = "okay";
-	};*/
+	};
 };
 
+&psgtr {
+	status = "okay";
+	clocks = <&PS_MGTREFCLK0>, <&PS_MGTREFCLK1>, <&PS_MGTREFCLK2>;
+	clock-names = "ref0", "ref1", "ref2";
+};
 
 /* flash0 node is defined in system-conf by Petalinux */
 &qspi {

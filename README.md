@@ -189,14 +189,14 @@ rm -rf xrt-git
 * Ubuntu 22.04 LTS runs well and can connect using DHCP over Ethernet
 * A Samsung NVME SSD reaches around 300 MB/s read/write on the X1 port
 * A .xmodel has been compiled in Vitis 2.5 and has been run using Jupyter on the board using a B800 configuration (resulting in 13 FPS)
-* The SYZYGY ADC/DAC can be used either over the native ZMOD port (only 1 available) or over the FMC-2-ZMOD adapter
+* The SYZYGY ADC/DAC can be used either over the native ZMOD port (only 1 available) or over the FMC-2-ZMOD adapter (see the relevant XDC file and port .tcl)
 
 ## Current progress and known problems
 * The WIFI - WILC1500 is recognised but fails to start the firmware and is not yet useable. I suspect it is a problem with the WILC1500 on-flash firmware or GPIO.
 * The audio chip is not yet included.
 * Only a selection of Pynq libraries is included (and/or tested)
 * The MIPI/PMOD and board specific IO have not been completely implemented or tested. But should be very straightforward by using the Digilent sources.
-* The Displayport has not been tested
+* The board does accept a different sodimm, but does not yet automatically allow you to use a larger sodimm. 
 
 ## Important to consider for future upgrades
 [This compatibility matrix](https://xilinx.github.io/Vitis-AI/3.5/html/docs/reference/version_compatibility.html#version-compatibility) shows you which combinations have been tested to work. An overview of kernels available for Ubuntu + the Vitis releases can be found [here](https://github.com/Xilinx/linux-xlnx/tags). The XRT packages (.deb) which can be installed directly starting from 2022.2 (for [2022.1](https://www.xilinx.com/bin/public/openDownload?filename=xrt_202210.2.13.466_20.04-amd64-xrt.deb) can be found [here](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-platforms/2022-2.html) under the respective version. 

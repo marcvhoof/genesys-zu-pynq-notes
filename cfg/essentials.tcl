@@ -954,7 +954,7 @@ set_property -dict [ list \
   CONFIG.PSU__GPIO2_MIO__PERIPHERAL__ENABLE {0} \
   CONFIG.PSU__GPIO_EMIO_WIDTH {3} \
   CONFIG.PSU__GPIO_EMIO__PERIPHERAL__ENABLE {1} \
-  CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {<Select>} \
+  CONFIG.PSU__GPIO_EMIO__PERIPHERAL__IO {3} \
   CONFIG.PSU__GPIO_EMIO__WIDTH {[94:0]} \
   CONFIG.PSU__GPU_PP0__POWER__ON {1} \
   CONFIG.PSU__GPU_PP1__POWER__ON {1} \
@@ -1429,6 +1429,8 @@ CONFIG.C_OPERATION {not} \
 CONFIG.C_SIZE {1} \
 ] $util_vector_logic_0
 
+#create GPIO_emio
+set gpio_emio [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:gpio_rtl:1.0 gpio_emio ]
  
 #connect DP
 connect_bd_net -net util_vector_logic_0_Res [get_bd_ports dp_aux_doe] [get_bd_pins util_vector_logic_0/Res]
@@ -1436,6 +1438,9 @@ connect_bd_net -net ps_0_dp_aux_data_oe_n [get_bd_pins util_vector_logic_0/Op1] 
 connect_bd_net -net ps_0_dp_aux_data_out [get_bd_ports dp_aux_dout] [get_bd_pins ps_0/dp_aux_data_out]
 connect_bd_net -net dp_hot_plug_detect_0_1 [get_bd_ports dp_aux_hotplug_detect] [get_bd_pins ps_0/dp_hot_plug_detect]
 connect_bd_net -net dp_aux_data_in_0_1 [get_bd_ports dp_aux_din] [get_bd_pins ps_0/dp_aux_data_in]
+
+#connect emio GPIO_0
+connect_bd_intf_net -intf_net ps_0_GPIO_0 [get_bd_intf_ports gpio_emio] [get_bd_intf_pins ps_0/GPIO_0]
 
 # Create audio_codec_ctrl_0 and connect iic /Z2 board example
 #set audio_codec_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:audio_codec_ctrl:1.0 audio_codec_ctrl_0 ]

@@ -1,3 +1,7 @@
+#General
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+set_property DCI_CASCADE {64} [get_iobanks 65]
+
 #Pavel's setup
 # clock input, connected to sysclk
 set_property IOSTANDARD LVCMOS18 [get_ports clk_i]
@@ -89,6 +93,20 @@ set_property PACKAGE_PIN G10 [get_ports {vadj_auton}]
 set_property IOSTANDARD LVCMOS33 [get_ports {vadj_level_0}]
 set_property IOSTANDARD LVCMOS33 [get_ports {vadj_level_1}]
 set_property IOSTANDARD LVCMOS18 [get_ports {vadj_auton}]
+set_property -dict { PACKAGE_PIN AA12 IOSTANDARD LVCMOS33 } [get_ports { PG_VADJ_R_tri_i }]; #IO_L12N_AD8N_44/24 Sch=pg_vadj_r
+
+# MUX I2C
+set_property -dict { PACKAGE_PIN F6 IOSTANDARD LVCMOS12 DRIVE 6 } [get_ports { gpio_emio_tri_io[0] }]; #IO_L15N_T2L_N5_AD11N_66 Sch=fpga_mux_rst
+
+set_property PACKAGE_PIN B8 [get_ports { gpio_emio_tri_io[1] }]; #IO_L22N_T3U_N7_DBC_AD0N_66 Sch=mipi_a_pwup_ls
+set_property IOSTANDARD LVCMOS12 [get_ports { gpio_emio_tri_io[1] }]
+set_property DRIVE 6 [get_ports { gpio_emio_tri_io[1] }]
+
+set_property PACKAGE_PIN A9 [get_ports { gpio_emio_tri_io[2] }]; #IO_L23P_T3U_N8_66 Sch=mipi_b_pwup_ls
+set_property IOSTANDARD LVCMOS12 [get_ports { gpio_emio_tri_io[2] }]
+set_property DRIVE 6 [get_ports { gpio_emio_tri_io[2] }]
+
+
 
 ### GZU ZMOD A
 ### FMC2ZMOD A

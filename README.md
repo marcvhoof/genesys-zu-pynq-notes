@@ -60,7 +60,7 @@ As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported 
 sudo apt-get update -y
 ```
 ```
-sudo apt-get--no-install-recommends install \
+sudo apt-get --no-install-recommends install \
   build-essential bison flex git curl ca-certificates sudo cmake \
   xvfb fontconfig libxrender1 libxtst6 libxi6 gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi \
   bc u-boot-tools device-tree-compiler libncurses5-dev \

@@ -8,7 +8,7 @@ NAME   = led_blinker
 PART   = xczu3eg-sfvc784-1-e
 PROC   = psu_cortexa53_0
 BOARD  = gzu_3eg
-VITISV = 2022.1
+VITISV = 2023.1
 
 CORES = axi_axis_reader_v1_0 axi_axis_writer_v1_0 axi_bram_reader_v1_0 \
   axi_bram_writer_v1_0 axi_cfg_register_v1_0 axi_sts_register_v1_0 \
@@ -32,10 +32,10 @@ RM = rm -rf
 DOCKERID := $(shell docker ps -a -q)
 
 UBOOT_TAG = xilinx-v$(VITISV)
-LINUX_TAG = xlnx_rebase_v5.15_LTS_2022.1
+LINUX_TAG = xlnx_rebase_v6.1_LTS_2023.1
 DTREE_TAG = xilinx_v$(VITISV)
 ATF_TAG = xilinx-v$(VITISV)
-XRT_TAG = 202210.2.13.466
+XRT_TAG = 202310.2.15.225
 
 UBOOT_DIR = tmp/u-boot-xlnx-$(UBOOT_TAG)
 LINUX_DIR = tmp/linux-$(LINUX_TAG)
@@ -52,12 +52,6 @@ UBOOT_URL = https://github.com/Xilinx/u-boot-xlnx/archive/$(UBOOT_TAG).tar.gz
 LINUX_URL = https://github.com/Xilinx/linux-xlnx/archive/refs/tags/$(LINUX_TAG).tar.gz
 DTREE_URL = https://github.com/Xilinx/device-tree-xlnx/archive/$(DTREE_TAG).tar.gz
 ATF_URL = https://github.com/Xilinx/arm-trusted-firmware/archive/refs/tags/$(ATF_TAG).tar.gz
-
-RTL8188_TAR = tmp/rtl8188eu-v5.2.2.4.tar.gz
-RTL8188_URL = https://github.com/lwfinger/rtl8188eu/archive/v5.2.2.4.tar.gz
-
-RTL8192_TAR = tmp/rtl8192cu-fixes-master.tar.gz
-RTL8192_URL = https://github.com/pvaret/rtl8192cu-fixes/archive/master.tar.gz
 
 .PRECIOUS: tmp/cores/% tmp/%.xpr tmp/%.xsa tmp/%.zip tmp/%.bit tmp/%.fsbl/executable.elf tmp/%.atf/bl31.elf tmp/%.pmu/pmu.elf tmp/%.tree/system-top.dts
 
@@ -87,17 +81,10 @@ $(ATF_TAR):
 	mkdir -p $(@D)
 	wget $(ATF_URL) -O $@
 
-$(RTL8188_TAR):
-	mkdir -p $(@D)
-	curl -L $(RTL8188_URL) -o $@
-
-$(RTL8192_TAR):
-	mkdir -p $(@D)
-	curl -L $(RTL8192_URL) -o $@
-
 $(XRT_DIR): $(LINUX_DIR)
 	mkdir -p $(@D)
 	git clone https://github.com/Xilinx/XRT $@ -b $(XRT_TAG) --depth 1
+	patch -N --forward -p0 -d $(XRT_DIR) < patches/xrt.patch	
 	make -C $(XRT_DIR)/src/runtime_src/core/edge/drm LINUXDIR=../../../../../../../$(LINUX_DIR) CROSS_COMPILE=aarch64-linux-gnu- modules
 	cp $(XRT_DIR)/src/runtime_src/core/edge/drm/zocl/zocl.ko $@
 
@@ -105,13 +92,9 @@ $(UBOOT_DIR): $(UBOOT_TAR)
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
 
-$(LINUX_DIR): $(LINUX_TAR) $(RTL8188_TAR) $(RTL8192_TAR) 
+$(LINUX_DIR): $(LINUX_TAR)
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
-	mkdir -p $@/drivers/net/wireless/realtek/rtl8188eu
-	mkdir -p $@/drivers/net/wireless/realtek/rtl8192cu
-	tar -zxf $(RTL8188_TAR) --strip-components=1 --directory=$@/drivers/net/wireless/realtek/rtl8188eu
-	tar -zxf $(RTL8192_TAR) --strip-components=1 --directory=$@/drivers/net/wireless/realtek/rtl8192cu
 	
 $(DTREE_DIR): $(DTREE_TAR)
 	mkdir -p $@
@@ -126,9 +109,6 @@ Image: $(LINUX_DIR)
 	make -C $< ARCH=arm64 xilinx_zynqmp_defconfig
 	cp cfg/.config tmp/linux-$(LINUX_TAG)
 	patch -N --forward -p0 -d tmp/linux-$(LINUX_TAG) < patches/$(LINUX_TAG).patch
-	rm -r tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
-	mkdir -p tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
-	tar -zxf patches/microchip.tar --directory=tmp/linux-$(LINUX_TAG)/drivers/net/wireless/microchip
 	make -C $< ARCH=arm64 -j $(shell nproc 2> /dev/null || echo 1) \
 	  CROSS_COMPILE=aarch64-linux-gnu-   \
 	  Image modules
@@ -208,7 +188,7 @@ tmp/%.tree/system-top.dts: tmp/%.xsa $(DTREE_DIR)
 	
 tmp/dpu/%.xmodel: 
 	mkdir -p $(@D)
-	cd $(@D) && git clone https://github.com/Xilinx/DPU-PYNQ.git
+	cd $(@D) && git clone https://github.com/Xilinx/DPU-PYNQ.git -b design_contest_3.5
 	cp -r projects/dpu/$(BOARD) $(@D)/DPU-PYNQ/boards
 	cd $(@D)/DPU-PYNQ/boards && git clone https://github.com/Xilinx/XilinxBoardStore -b $(VITISV)
 	make -C $(@D)/DPU-PYNQ/boards BOARD=$(BOARD)
@@ -217,9 +197,9 @@ tmp/dpu/%.xmodel:
 	patch -p0 -N --forward -d  $(@D)/DPU-PYNQ/host/ -p 0 < patches/docker/docker.patch
 	cp patches/docker/*.sh $(@D)/DPU-PYNQ/host/
 	cp $(@D)/DPU-PYNQ/boards/$(BOARD)/binary_container_1/link/vivado/vpl/prj/prj.gen/sources_1/bd/design_1/ip/design_1_DPUCZDX8G_1_0/arch.json $(@D)/DPU-PYNQ/host/
-	(cd $(@D)/DPU-PYNQ/host/; ./docker_run.sh xilinx/vitis-ai:2.5.0)
+	(cd $(@D)/DPU-PYNQ/host/; ./docker_run.sh xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306)
 	#the adapted docker_run.sh starts docker_script.sh which compiles resnet50 with pytorch
-	cp $(@D)/DPU-PYNQ/host/./tf2_resnet50.xmodel $(@D)/$(NAME).xmodel
+	#cp $(@D)/DPU-PYNQ/host/./tf2_resnet50.xmodel $(@D)/$(NAME).xmodel
 
 clean:
 	$(RM) Image boot.bin devicetree.dtb tmp fsbl.elf devicetree.dtb system.bit pmu.elf u-boot.elf bl31.elf *.zip *.tar.gz

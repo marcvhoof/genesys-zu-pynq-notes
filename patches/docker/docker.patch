@@ -1,42 +1,5 @@
 --- docker_run.sh
 +++ docker_run.sh
-@@ -1,36 +1,7 @@
- #!/bin/bash
- # Copyright 2022 Xilinx Inc.
- 
--sed -n '1, 5p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
- 
--sed -n '5, 15p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
--
--sed -n '15, 28p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
--
--sed -n '28, 61p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
--
--sed -n '62, 224p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
--
--sed -n '224, 308p' PROMPT.txt
--read -n 1 -s -r -p "Press any key to continue..." key
--
--confirm() {
--  echo -en "\n\nDo you agree to the terms and wish to proceed [y/n]? "
--  read REPLY
--  case $REPLY in
--    [Yy]) ;;
--    [Nn]) exit 0 ;;
--    *) confirm ;;
--  esac
--    REPLY=''
--}
--
--confirm
- 
- 
- if [[ "$1" == "-h" || "$1" == "--help" ]]; then
 @@ -95,7 +66,7 @@
      ${DETACHED} \
      ${RUN_MODE} \

@@ -1,11 +1,11 @@
-LINUX_TAG=xlnx_rebase_v5.15_LTS_2022.1
+LINUX_TAG=xlnx_rebase_v6.1_LTS_2023.1
 device=$1
 
 boot_dir=`mktemp -d /tmp/BOOT.XXXXXXXXXX`
 root_dir=`mktemp -d /tmp/ROOT.XXXXXXXXXX`
 
 linux_dir=tmp/linux-$LINUX_TAG
-linux_ver=5.15
+linux_ver=6.1
 
 distro=jammy
 arch=arm64
@@ -62,9 +62,6 @@ tar -zxf $root_tar --directory=$root_dir
 modules_dir=$root_dir/lib/modules/$linux_ver
 
 mkdir -p $modules_dir/kernel
-mkdir -p $root_dir/lib/firmware/
-mkdir -p $root_dir/lib/firmware/mchp
-cp patches/wilcfirmware/wilc*.bin $root_dir/lib/firmware/mchp
 
 cp tmp/xrt*/zocl.ko $linux_dir/
 
@@ -85,6 +82,9 @@ cp /usr/bin/qemu-arm-static $root_dir/usr/bin/
 
 mkdir -p $root_dir/usr/xrt/patches
 cp -r patches/xrt/* $root_dir/usr/xrt/patches
+
+mkdir -p $root_dir/usr/dfx/patches
+cp -r patches/dfx/* $root_dir/usr/dfx/patches
 
 sudo chroot $root_dir <<- EOF_CHROOT
 export LANG=C
@@ -264,6 +264,10 @@ apt-get --allow-unauthenticated -y install libdrm-xlnx-dev
 
 cp -f -r usr/xrt/patches/bin/* usr/bin
 cp -n -r usr/xrt/patches/lib/* usr/lib
+
+cp -f -r usr/dfx/patches/dfx-mgr etc/
+cp -n -r usr/dfx/patches/lib/* usr/lib/aarch64-linux-gnu
+cp -f -r usr/dfx/patches/bin/* usr/bin
 
 touch etc/udev/rules.d/75-persistent-net-generator.rules
 

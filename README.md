@@ -5,12 +5,10 @@
 The ease of use of [Pavel Demin's way of working](http://pavel-demin.github.io/red-pitaya-notes/) with building the FPGA sources and embedded Linux is in my opinion unmatched. It is straightforward and the code is easy to maintain over time. It allows a beginner to catch on, and an expert to focus on a a straightforward implementation of their FPGA project. The clarity of the source code tree allows for (partial) re-use and easy spread. Initially this was a ported fork, due to extensive changes and a crucial difference in target platform (mpsoc vs. zynq 7000), a new repository for this PYNQ/DPU enabled version was more appropriate to make it easier to work from for other Xilinx MPSoC projects. 
 
 ## What's included?
-In this repository, I included **Ubuntu 22.04 LTS (instead of Petalinux), PYNQ (3.0) and a DPU example** (from IP to the compilation of a neural network). The latter includes the creation of model zoo neural network using Vitis 2.5 in a Docker. Everything is there for you the implement your own custom, neural networks on the DPU. Making the DPU requires a lot of space - > 100GB.
+In this repository, I included **Ubuntu 22.04 LTS (instead of Petalinux), PYNQ (3.0 / Vitis 3.5) and a DPU example** (from IP to the compilation of a neural network). The latter includes the creation of model zoo neural network using Vitis 2.5 in a Docker. Everything is there for you the implement your own custom, neural networks on the DPU. Making the DPU requires a lot of space - > 100GB.
 
 ## Getting started
-These commands should be the only ones you need to build your image. You do need to install [Xilinx Vitis 2022.1](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html) and [XRT 2022.1](https://www.xilinx.com/bin/public/openDownload?filename=xrt_202210.2.13.466_20.04-amd64-xrt.deb). 
-
-As a **host - Ubuntu 20.04 LTS is requiered**, newer versions are not supported and will give you problems with installing XRT, which is necessary for building the DPU (see compatibility matrix below). If your machine is running a different version, I would consider using a Cloud or Vagrant install. However - if you plan to use CUDA or extensive training for your neural network in Vitis AI, probably a local setup (e.g. with Docker) is more efficient. 
+These commands should be the only ones you need to build your image. You do need to install [Xilinx Vitis 2023.1](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html) and [XRT 2023.1](https://www.xilinx.com/bin/public/openDownload?filename=xrt_202310.2.15.225_22.04-amd64-xrt.deb). 
 
 <details>
   <summary>Optional Cloud, Docker or Vagrant instructions - when starting from scratch</summary>
@@ -65,7 +63,7 @@ sudo apt-get --no-install-recommends install \
   xvfb fontconfig libxrender1 libxtst6 libxi6 gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi \
   bc u-boot-tools device-tree-compiler libncurses5-dev \
   libssl-dev qemu-user-static binfmt-support zip ca-certificates curl gnupg \
-  squashfs-tools dosfstools parted debootstrap zerofree gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu 
+  squashfs-tools dosfstools parted debootstrap zerofree gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu libgnutls28-dev
 ```
 ```
 sudo ln -s make /usr/bin/gmake
@@ -138,7 +136,7 @@ cp pynq/pynq/notebooks/common/ -r $PYNQ_JUPYTER_NOTEBOOKS
 ```
 Connect to the Jupyter (gzupynq.local:9090, password: xilinx) in your browser and start creating your project. To get the IP address:
 
-# 8. [optional] Create the DPU Overlay and start working with Vitis-AI 2.5
+# 8. [optional] Create the DPU Overlay and start working with Vitis-AI 3.5
 In the genesys-zu-pynq-notes directory execute the following command. 
 ```
 make DPU
@@ -232,5 +230,6 @@ And the Xilinx DPU, (Kria-)Pynq github
 * https://github.com/Xilinx/PYNQ
 * https://github.com/Xilinx/DPU-PYNQ
 * https://github.com/Xilinx/Kria-PYNQ
+
 
 
